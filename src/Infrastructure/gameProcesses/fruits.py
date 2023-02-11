@@ -1,4 +1,4 @@
-from src.Core.Abstract import item
+from src import item
 
 
 class PacDot(item.FruitEntity):
