@@ -1,8 +1,9 @@
 import sys
 import pygame as pg
 from src.Infrastructure.gameCore import GameSettings
-from src.Core.Abstract.map import GameMap
+from src.Infrastructure.gameMaps import Level_1
 from src.Infrastructure.inputController import Events
+
 
 class PackManWorld():
 
@@ -11,7 +12,7 @@ class PackManWorld():
 
         self.settings = GameSettings()
         self.screen = pg.display.set_mode((self.settings.screen_width, self.settings.screen_height))
-        self.game_map = GameMap()
+        self.game_map = Level_1()
         self.events = Events()
 
     # main game loop
