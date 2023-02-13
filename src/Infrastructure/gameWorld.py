@@ -20,7 +20,7 @@ class PackManWorld():
         self.events = Events(self)
 
         self.statistics = Statistics()
-        self.statistics_view = StatisticsView(self.statistics, self.screen)
+        self.statistics_view = StatisticsView(self.statistics, self.screen, self.player)
         BonusEntity.statistics = self.statistics
 
     # main game loop

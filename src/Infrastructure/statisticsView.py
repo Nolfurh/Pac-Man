@@ -3,9 +3,10 @@ from src.Infrastructure.gameProcesses.statistics import Statistics
 
 
 class StatisticsView:
-    def __init__(self, statistics, screen):
+    def __init__(self, statistics, screen, player):
         self.statistics = statistics
         self.screen = screen
+        self.player = player
         self.font = pygame.font.SysFont('timesnewroman',  38)
 
     def ShowStatistics(self):

@@ -12,8 +12,6 @@ class Events():
                 sys.exit()
             elif event.type == pg.KEYDOWN:
                 self.check_keydown_events(event)
-            elif event.type == pg.KEYUP:
-                self.check_keyup_events(event)
 
     def check_keydown_events(self, event):
         if event.key == pg.K_RIGHT:
@@ -26,13 +24,3 @@ class Events():
             self.player.moving_down = True
         elif event.key == pg.K_q:
             sys.exit()
-
-    def check_keyup_events(self, event):
-        if event.key == pg.K_RIGHT:
-            self.player.moving_right = False
-        elif event.key == pg.K_LEFT:
-            self.player.moving_left = False
-        elif event.key == pg.K_UP:
-            self.player.moving_up = False
-        elif event.key == pg.K_DOWN:
-            self.player.moving_down = False

@@ -23,22 +23,40 @@ class Pacman:
         self.y = float(self.rect.y)
 
         self.turns = [False, False, False, False]
+        self.clock = pg.time.Clock()
 
 
     def update(self):
+        delta_time = self.clock.tick()
         self.check_position()
         if self.moving_right and self.turns[0]:
-            self.x += self.settings.pacman_speed
+            self.x += self.settings.pacman_speed * (delta_time / 5)
             self.turns[0] = False
+            self.moving_left = False
+            self.moving_up = False
+            self.moving_down = False
+
         if self.moving_left and self.turns[1]:
-            self.x -= self.settings.pacman_speed
+            self.x -= self.settings.pacman_speed * (delta_time / 5)
             self.turns[1] = False
+            self.moving_right = False
+            self.moving_up = False
+            self.moving_down = False
+
         if self.moving_up and self.turns[2]:
-            self.y -= self.settings.pacman_speed
+            self.y -= self.settings.pacman_speed * (delta_time / 5)
             self.turns[2] = False
+            self.moving_right = False
+            self.moving_left = False
+            self.moving_down = False
+
         if self.moving_down and self.turns[3]:
-            self.y += self.settings.pacman_speed
+            self.y += self.settings.pacman_speed * (delta_time / 5)
             self.turns[3] = False
+            self.moving_right = False
+            self.moving_left = False
+            self.moving_up = False
+
         self.rect.x = self.x
         self.rect.y = self.y
 
