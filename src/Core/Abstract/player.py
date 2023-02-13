@@ -1,4 +1,6 @@
 import pygame as pg
+from src.Infrastructure.gameProcesses.statistics import Statistics
+from  src.Infrastructure.gameProcesses import fruits, bonuses
 
 class Pacman:
     def __init__(self, var):
@@ -60,6 +62,8 @@ class Pacman:
         self.rect.x = self.x
         self.rect.y = self.y
 
+        self.eat()
+
     def check_position(self):
         x_pos = self.settings.screen_width // 30
         y_pos = (self.settings.screen_height - 50) // 32
@@ -111,3 +115,20 @@ class Pacman:
 
     def blitme(self):
         self.screen.blit(self.image, self.rect)
+
+    def eat(self):
+        x_pos = self.settings.screen_width // 30
+        y_pos = (self.settings.screen_height - 50) // 32
+        centerx = self.x + 17
+        centery = self.y + 17
+
+        if self.map_matrix[int(centery // y_pos)][int(centerx // x_pos)] == 1:
+            self.map_matrix[int(centery // y_pos)][int(centerx // x_pos)] = 0
+            PacDot = fruits.PacDot()
+            Statistics.score += PacDot.score
+            Statistics.collectedPacDots += 1
+
+        if self.map_matrix[int(centery // y_pos)][int(centerx // x_pos)] == 2:
+            self.map_matrix[int(centery // y_pos)][int(centerx // x_pos)] = 0
+            PowerPellet = bonuses.PowerPellet()
+            PowerPellet.use()

@@ -22,6 +22,7 @@ class PackManWorld():
         self.statistics = Statistics()
         self.statistics_view = StatisticsView(self.statistics, self.screen, self.player)
         BonusEntity.statistics = self.statistics
+        self.statistics.allPacDots = self.game_map.get_PacDots()
 
     # main game loop
     def run_game(self):

@@ -8,6 +8,7 @@ class GameMap:
         self.settings = GameSettings()
         self.map_matrix = [[]]
         self.screen = pg.display.set_mode((self.settings.screen_width, self.settings.screen_height))
+        self.totalPacDots = self.get_PacDots()
 
     def draw_map(self):
         x_pos = self.settings.screen_width // 30
@@ -45,3 +46,13 @@ class GameMap:
                 if self.map_matrix[i][j] == 9:
                     pg.draw.line(self.screen, self.settings.map_lines_door, (j * x_pos, i * y_pos + (0.5 * y_pos)),
                                  (j * x_pos + x_pos, i * y_pos + (0.5 * y_pos)), 3)
+
+    def get_PacDots(self):
+        pac_dots = 0
+
+        for i in range(len(self.map_matrix)):
+            for j in range(len(self.map_matrix[i])):
+                if self.map_matrix[i][j] == 1:
+                    pac_dots += 1
+
+        return pac_dots
