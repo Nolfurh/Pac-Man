@@ -2,12 +2,15 @@ import abc
 
 
 class ItemEntity(abc.ABC):
-    def use(self):
+
+    @staticmethod
+    def use(statistics):
         pass
 
 
 class BonusEntity(ItemEntity):
-    pass
+    statistics = None
+
 
 
 class FruitEntity(ItemEntity):
