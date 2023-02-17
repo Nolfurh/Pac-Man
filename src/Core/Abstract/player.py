@@ -24,7 +24,7 @@ class Pacman:
         self.x = float(self.rect.x)
         self.y = float(self.rect.y)
 
-        self.turns = [False, False, False, False]
+        self.turns = [True, True, True, True]
         self.clock = pg.time.Clock()
 
 
@@ -127,6 +127,7 @@ class Pacman:
             PacDot = fruits.PacDot()
             Statistics.score += PacDot.score
             Statistics.collectedPacDots += 1
+            Statistics.check_win()
 
         if self.map_matrix[int(centery // y_pos)][int(centerx // x_pos)] == 2:
             self.map_matrix[int(centery // y_pos)][int(centerx // x_pos)] = 0

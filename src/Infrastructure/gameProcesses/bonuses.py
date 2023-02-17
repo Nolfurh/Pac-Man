@@ -6,9 +6,9 @@ import threading
 
 class PowerPellet(item.BonusEntity):
     def activate(self):
-        PowerPellet.statistics.activatedBonuses.append(self)
+        Statistics.activatedBonuses.append(self)
         time.sleep(10)
-        PowerPellet.statistics.activatedBonuses.remove(self)
+        Statistics.activatedBonuses.remove(self)
         
     @staticmethod
     def use():

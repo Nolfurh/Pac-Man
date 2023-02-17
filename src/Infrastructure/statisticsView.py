@@ -21,10 +21,10 @@ class StatisticsView:
 
         if self.statistics.win:
             win_font = pygame.font.SysFont('timesnewroman',  60)
-            win_render = win_font.render(f"Вітаємо, Ви перемогли!", True, 'white', 'black')
-            self.screen.blit(win_render, self.screen.get_rect().center)
+            win_render = win_font.render(f"Вітаємо, Ви перемогли!", True, 'green')
+            self.screen.blit(win_render, win_render.get_rect(center = self.screen.get_rect().center))
 
         if self.statistics.lose:
             lose_font = pygame.font.SysFont('timesnewroman',  60)
             lose_render = lose_font.render(f"Програш", True, 'white', 'black')
-            self.screen.blit(lose_render, self.screen.get_rect().center)
+            self.screen.blit(lose_render, lose_render.get_rect(center = self.screen.get_rect().center))

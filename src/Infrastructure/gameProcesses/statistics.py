@@ -6,3 +6,8 @@ class Statistics:
     activatedBonuses = []
     win = False
     lose = False
+
+    @staticmethod
+    def check_win():
+        if Statistics.collectedPacDots >= Statistics.allPacDots:
+            Statistics.win = True

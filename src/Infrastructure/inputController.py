@@ -15,12 +15,28 @@ class Events():
 
     def check_keydown_events(self, event):
         if event.key == pg.K_RIGHT:
-            self.player.moving_right = True
+            if self.player.turns[0]:
+                self.player.moving_left = False
+                self.player.moving_up = False
+                self.player.moving_down = False
+                self.player.moving_right = True
         elif event.key == pg.K_LEFT:
-            self.player.moving_left = True
+            if self.player.turns[1]:
+                self.player.moving_right = False
+                self.player.moving_up = False
+                self.player.moving_down = False
+                self.player.moving_left = True
         elif event.key == pg.K_UP:
-            self.player.moving_up = True
+            if self.player.turns[2]:
+                self.player.moving_right = False
+                self.player.moving_left = False
+                self.player.moving_down = False
+                self.player.moving_up = True
         elif event.key == pg.K_DOWN:
-            self.player.moving_down = True
+            if self.player.turns[3]:
+                self.player.moving_right = False
+                self.player.moving_left = False
+                self.player.moving_up = False
+                self.player.moving_down = True
         elif event.key == pg.K_q:
             sys.exit()
