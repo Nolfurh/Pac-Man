@@ -7,6 +7,7 @@ from src.Infrastructure.gameProcesses.statistics import Statistics
 from src.Infrastructure.statisticsView import StatisticsView
 from src.Core.Abstract.item import BonusEntity
 from src.Core.Abstract.player import Pacman
+from src.Core.Abstract.enemy import Ghosts
 
 class PackManWorld():
 
@@ -24,12 +25,22 @@ class PackManWorld():
         BonusEntity.statistics = self.statistics
         Statistics.allPacDots = self.game_map.get_PacDots()
 
+        self.playerx = self.player.rect.x
+        self.playery = self.player.rect.y
+        self.powerup = self.player.powerup
+
+        self.ghosts = Ghosts(self)
+
     # main game loop
     def run_game(self):
         while True:
             self._update_screen()
             self.events.check_events()
             self.player.update()
+            self.playerx = self.player.rect.x
+            self.playery = self.player.rect.y
+            self.powerup = self.player.powerup
+            self.ghosts.update(self)
 
             pg.display.flip()  # [last function] to redraw last frames on screen
 
