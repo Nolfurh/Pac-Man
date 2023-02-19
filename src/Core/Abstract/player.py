@@ -16,6 +16,8 @@ class Pacman:
         self.rect.centerx = self.settings.pacman_x
         self.rect.centery = self.settings.pacman_y
 
+        self.powerup = False
+
         self.moving_right = False
         self.moving_left = False
         self.moving_up = False
