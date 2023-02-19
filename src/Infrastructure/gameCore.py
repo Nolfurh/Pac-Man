@@ -14,3 +14,6 @@ class GameSettings():
         self.pacman_speed = 1.4
         self.pacman_x = 450
         self.pacman_y = 631
+
+        self.time_to_fruit_appearing1 = 15
+        self.time_to_fruit_appearing2 = 35

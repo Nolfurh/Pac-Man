@@ -14,4 +14,6 @@ class BonusEntity(ItemEntity):
 
 
 class FruitEntity(ItemEntity):
-    pass
+    def __init__(self):
+        super().__init__()
+        self.score = 0

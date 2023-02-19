@@ -7,6 +7,7 @@ from src.Infrastructure.gameProcesses.statistics import Statistics
 from src.Infrastructure.statisticsView import StatisticsView
 from src.Core.Abstract.item import BonusEntity
 from src.Core.Abstract.player import Pacman
+from src.Infrastructure.fruitsController import FruitsController
 
 class PackManWorld():
 
@@ -23,6 +24,7 @@ class PackManWorld():
         self.statistics_view = StatisticsView(self.statistics, self.screen, self.player)
         BonusEntity.statistics = self.statistics
         Statistics.allPacDots = self.game_map.get_PacDots()
+        self.fruitsController = FruitsController(self.settings.time_to_fruit_appearing1, self.settings.time_to_fruit_appearing2, self.game_map, self.player, self.settings)
 
     # main game loop
     def run_game(self):
@@ -30,6 +32,7 @@ class PackManWorld():
             self._update_screen()
             self.events.check_events()
             self.player.update()
+            self.fruitsController.fruit_controller_update()
 
             pg.display.flip()  # [last function] to redraw last frames on screen
 
