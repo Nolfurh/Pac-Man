@@ -25,9 +25,13 @@ class PackManWorld():
         BonusEntity.statistics = self.statistics
         Statistics.allPacDots = self.game_map.get_PacDots()
 
+        self.vulnerable = pg.transform.scale(pg.image.load('src/Core/images/vulnerable-ghost.bmp'), (35, 35))
+        self.rect = self.vulnerable.get_rect()
+        self.rect.centerx = 350
+        self.rect.centery = 350
+
         self.playerx = self.player.rect.x
         self.playery = self.player.rect.y
-        self.powerup = self.player.powerup
 
         self.ghosts = Ghosts(self)
 
@@ -37,9 +41,10 @@ class PackManWorld():
             self._update_screen()
             self.events.check_events()
             self.player.update()
-            self.playerx = self.player.rect.x
-            self.playery = self.player.rect.y
-            self.powerup = self.player.powerup
+
+            self.playerx = self.player.rect.centerx
+            self.playery = self.player.rect.centery
+
             self.ghosts.update(self)
 
             pg.display.flip()  # [last function] to redraw last frames on screen
@@ -50,4 +55,3 @@ class PackManWorld():
         self.game_map.draw_map()
         self.statistics_view.ShowStatistics()
         self.player.blitme()
-

@@ -11,16 +11,17 @@ class GameSettings():
         self.map_lines_color = 'blue'
         self.map_lines_door = 'white'
 
-        self.pacman_speed = 1.4
+        self.pacman_speed = 1.0
         self.pacman_x = 450
         self.pacman_y = 631
 
         self.ghosts_speed = 1.0
-        self.blinky_x = 56
-        self.blinky_y = 58
-        self.inky_x = 400
-        self.inky_y = 350
-        self.clyde_x = 365
-        self.clyde_y = 360
-        self.pinky_x = 370
-        self.pinky_y = 352
+        self.blinky_x = 310
+        self.blinky_y = 380
+        self.inky_x = 440
+        self.inky_y = 330
+        self.clyde_x = 310
+        self.clyde_y = 330
+        self.pinky_x = 440
+        self.pinky_y = 380
+        self.froze = 50

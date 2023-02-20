@@ -16,8 +16,6 @@ class Pacman:
         self.rect.centerx = self.settings.pacman_x
         self.rect.centery = self.settings.pacman_y
 
-        self.powerup = False
-
         self.moving_right = False
         self.moving_left = False
         self.moving_up = False
@@ -64,6 +62,14 @@ class Pacman:
         self.rect.x = self.x
         self.rect.y = self.y
 
+        if self.rect.x > 700:
+            self.x = -10
+            self.rect.x = self.x
+        elif self.rect.x < -10:
+            self.x = 700
+            self.rect.x = self.x
+
+
         self.eat()
 
     def check_position(self):
@@ -72,18 +78,19 @@ class Pacman:
         tweaker_1 = 15
         centerx = self.x + 17
         centery = self.y + 17
-        if centerx // 30 < 29:
+        if -16 < centerx // 30 < 29:
             if self.moving_right:
-                if self.map_matrix[int(centery // y_pos)][int((centerx + tweaker_1) // x_pos)] < 3:
-                    self.turns[0] = True
-            if self.moving_left:
                 if self.map_matrix[int(centery // y_pos)][int((centerx - tweaker_1) // x_pos)] < 3:
                     self.turns[1] = True
+            if self.moving_left:
+                if self.map_matrix[int(centery // y_pos)][int((centerx + tweaker_1) // x_pos)] < 3:
+                    self.turns[0] = True
+
             if self.moving_up:
-                if self.map_matrix[int((self.y + tweaker_1) // y_pos)][int(self.x // x_pos)] < 3:
+                if self.map_matrix[int((centery + tweaker_1) // y_pos)][int(centerx // x_pos)] < 3:
                     self.turns[3] = True
             if self.moving_down:
-                if self.map_matrix[int((self.y - tweaker_1) // y_pos)][int(self.x // x_pos)] < 3:
+                if self.map_matrix[int((centery - tweaker_1) // y_pos)][int(centerx // x_pos)] < 3:
                     self.turns[2] = True
 
             if self.moving_up or self.moving_down:
