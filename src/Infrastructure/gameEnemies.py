@@ -160,6 +160,7 @@ class Blinky():
         self.result_collision()
 
     def result_collision(self):
+        player_circle = pg.draw.circle(self.screen, 'gray', (self.player_x, self.player_y), 21, 2)
         if not Statistics().activatedBonuses:
             if (player_circle.colliderect(self.rect)) and not self.eaten:
                 if Statistics.lives > 0:
@@ -424,7 +425,7 @@ class Inky():
         self.result_collision()
 
     def result_collision(self):
-        player_circle = pg.draw.circle(self.screen, 'purple', (self.player_x, self.player_y), 21, 2)
+        player_circle = pg.draw.circle(self.screen, 'black', (self.player_x, self.player_y), 21, 2)
         if not Statistics().activatedBonuses:
             if (player_circle.colliderect(self.rect)) and not self.eaten:
                 if Statistics.lives > 0:
@@ -647,7 +648,7 @@ class Pinky():
         self.result_collision()
 
     def result_collision(self):
-        player_circle = pg.draw.circle(self.screen, 'purple', (self.player_x, self.player_y), 21, 2)
+        player_circle = pg.draw.circle(self.screen, 'black', (self.player_x, self.player_y), 21, 2)
         if not Statistics().activatedBonuses:
             if (player_circle.colliderect(self.rect)) and not self.eaten:
                 if Statistics.lives > 0:
@@ -886,7 +887,7 @@ class Clyde():
         self.result_collision()
 
     def result_collision(self):
-        player_circle = pg.draw.circle(self.screen, 'purple', (self.player_x, self.player_y), 21, 2)
+        player_circle = pg.draw.circle(self.screen, 'black', (self.player_x, self.player_y), 21, 2)
         if not Statistics().activatedBonuses:
             if (player_circle.colliderect(self.rect)) and not self.eaten:
                 if Statistics.lives > 0:
