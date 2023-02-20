@@ -34,28 +34,28 @@ class Pacman:
         delta_time = self.clock.tick()
         self.check_position()
         if self.moving_right and self.turns[0]:
-            self.x += self.settings.pacman_speed * (delta_time / 5)
+            self.x += self.settings.pacman_speed * (delta_time / 10)
             self.turns[0] = False
             self.moving_left = False
             self.moving_up = False
             self.moving_down = False
 
         if self.moving_left and self.turns[1]:
-            self.x -= self.settings.pacman_speed * (delta_time / 5)
+            self.x -= self.settings.pacman_speed * (delta_time / 10)
             self.turns[1] = False
             self.moving_right = False
             self.moving_up = False
             self.moving_down = False
 
         if self.moving_up and self.turns[2]:
-            self.y -= self.settings.pacman_speed * (delta_time / 5)
+            self.y -= self.settings.pacman_speed * (delta_time / 10)
             self.turns[2] = False
             self.moving_right = False
             self.moving_left = False
             self.moving_down = False
 
         if self.moving_down and self.turns[3]:
-            self.y += self.settings.pacman_speed * (delta_time / 5)
+            self.y += self.settings.pacman_speed * (delta_time / 10)
             self.turns[3] = False
             self.moving_right = False
             self.moving_left = False

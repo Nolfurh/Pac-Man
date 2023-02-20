@@ -1,3 +1,4 @@
+import os
 import sys
 import pygame as pg
 from src.Infrastructure.gameCore import GameSettings
@@ -35,6 +36,10 @@ class PackManWorld():
         self.powerup = self.player.powerup
 
         self.ghosts = Ghosts(self)
+
+        self.beginning_sound = pg.mixer.Sound(os.path.join('src', os.path.join('Core',
+                                                         os.path.join('sounds', 'pacman_beginning.wav'))))
+        self.beginning_sound.play()
 
     # main game loop
     def run_game(self):

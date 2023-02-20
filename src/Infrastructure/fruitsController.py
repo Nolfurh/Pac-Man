@@ -40,6 +40,7 @@ class FruitsController:
                     self.map.fruit_appearing[1] == int(
                     (self.player.y + 17) // ((self.settings.screen_height - 50) // 32)):
                 Statistics.score += self.fruit.score
+                self.fruit.eat_sound.play()
                 self.fruit = None
             else:
                 if int(time.thread_time()) - int(self.time_of_fruit_creation) == self.fruit.time_until_disappear:
