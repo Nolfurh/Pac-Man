@@ -9,6 +9,7 @@ from src.Core.Abstract.item import BonusEntity
 from src.Core.Abstract.player import Pacman
 from src.Infrastructure.fruitsController import FruitsController
 from src.Core.Abstract.enemy import Ghosts
+from src.Infrastructure.pacmanCMD import pacmd
 
 class PackManWorld():
 
@@ -16,8 +17,10 @@ class PackManWorld():
         pg.init()
 
         self.settings = GameSettings()
+        self.pacmd = pacmd(self.settings)
+        self.pacmd.parse_cmd()
         self.screen = pg.display.set_mode((self.settings.screen_width, self.settings.screen_height))
-        self.game_map = Level_1()
+        self.game_map = Level_1(self.settings)
         self.player = Pacman(self)
         self.events = Events(self)
 
