@@ -1,7 +1,14 @@
 import abc
+import os
+
+import pygame
 
 
 class ItemEntity(abc.ABC):
+    def __init__(self):
+        self.eat_sound = pygame.mixer.Sound(os.path.join('src', os.path.join('Core',
+                                                                             os.path.join('sounds',
+                                                                                          'pacman_eatfruit.wav'))))
 
     @staticmethod
     def use(statistics):
@@ -14,4 +21,6 @@ class BonusEntity(ItemEntity):
 
 
 class FruitEntity(ItemEntity):
-    pass
+    def __init__(self):
+        super().__init__()
+        self.score = 0

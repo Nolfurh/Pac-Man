@@ -1,4 +1,6 @@
 import pygame as pg
+import pygame.transform
+
 from src.Infrastructure.gameProcesses.statistics import Statistics
 from  src.Infrastructure.gameProcesses import fruits, bonuses
 
@@ -7,7 +9,12 @@ class Pacman:
         self.screen = var.screen
         self.screen_rect = var.screen.get_rect()
 
-        self.image = pg.transform.scale(pg.image.load('src/Core/images/Pacman.png'), (35, 35))
+        self.spritesheet = []
+        self.current_sprite = 0
+        self.spritesheet.append(pg.transform.scale(pg.image.load('src/Core/images/Pacman1.png'), (35, 35)))
+        self.spritesheet.append(pg.transform.scale(pg.image.load('src/Core/images/Pacman2.png'), (35, 35)))
+        self.spritesheet.append(pg.transform.scale(pg.image.load('src/Core/images/Pacman3.png'), (35, 35)))
+        self.image = self.spritesheet[self.current_sprite]
         self.rect = self.image.get_rect()
 
         self.settings = var.settings
@@ -32,32 +39,40 @@ class Pacman:
         delta_time = self.clock.tick()
         self.check_position()
         if self.moving_right and self.turns[0]:
-            self.x += self.settings.pacman_speed * (delta_time / 5)
+            self.x += self.settings.pacman_speed * (delta_time / 10)
             self.turns[0] = False
             self.moving_left = False
             self.moving_up = False
             self.moving_down = False
 
+            self.animate()
+
         if self.moving_left and self.turns[1]:
-            self.x -= self.settings.pacman_speed * (delta_time / 5)
+            self.x -= self.settings.pacman_speed * (delta_time / 10)
             self.turns[1] = False
             self.moving_right = False
             self.moving_up = False
             self.moving_down = False
 
+            self.animate()
+
         if self.moving_up and self.turns[2]:
-            self.y -= self.settings.pacman_speed * (delta_time / 5)
+            self.y -= self.settings.pacman_speed * (delta_time / 10)
             self.turns[2] = False
             self.moving_right = False
             self.moving_left = False
             self.moving_down = False
 
+            self.animate()
+
         if self.moving_down and self.turns[3]:
-            self.y += self.settings.pacman_speed * (delta_time / 5)
+            self.y += self.settings.pacman_speed * (delta_time / 10)
             self.turns[3] = False
             self.moving_right = False
             self.moving_left = False
             self.moving_up = False
+
+            self.animate()
 
         self.rect.x = self.x
         self.rect.y = self.y
@@ -123,7 +138,30 @@ class Pacman:
         return self.turns
 
     def blitme(self):
-        self.screen.blit(self.image, self.rect)
+        # self.screen.blit(self.image, self.rect)
+
+        img = self.image
+
+        if self.moving_right:
+            img = pygame.transform.rotate(img, 0)
+
+        if self.moving_left:
+            img = pygame.transform.rotate(img, 180)
+
+        if self.moving_up:
+            img = pygame.transform.rotate(img, 90)
+
+        if self.moving_down:
+            img = pygame.transform.rotate(img, 270)
+
+        self.screen.blit(img, self.rect)
+
+    def animate(self):
+        self.current_sprite += 1
+        if self.current_sprite >= len(self.spritesheet):
+            self.current_sprite = 0
+
+        self.image = self.spritesheet[self.current_sprite]
 
     def eat(self):
         x_pos = self.settings.screen_width // 30

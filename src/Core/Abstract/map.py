@@ -4,8 +4,8 @@ from src.Infrastructure.gameCore import GameSettings
 
 
 class GameMap:
-    def __init__(self):
-        self.settings = GameSettings()
+    def __init__(self, settings):
+        self.settings = settings
         self.map_matrix = [[]]
         self.screen = pg.display.set_mode((self.settings.screen_width, self.settings.screen_height))
         self.totalPacDots = self.get_PacDots()

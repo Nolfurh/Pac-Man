@@ -15,6 +15,9 @@ class GameSettings():
         self.pacman_x = 450
         self.pacman_y = 631
 
+        self.time_to_fruit_appearing1 = 15
+        self.time_to_fruit_appearing2 = 35
+
         self.ghosts_speed = 1.0
         self.blinky_x = 310
         self.blinky_y = 380

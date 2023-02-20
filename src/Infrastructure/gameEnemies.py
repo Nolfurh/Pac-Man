@@ -80,36 +80,6 @@ class PositionCheck():
         else:
             var.in_box = False
         return var.turns, var.in_box
-# class GhostSet:
-#     def __init__(self, var):
-#         self.image = var.image
-#         self.vulnerable = var.vulnerable
-#         self.spunky = var.spunky
-#
-#         self.rect = self.image.get_rect()
-#         self.screen = var.screen
-#
-#         self.settings = var.settings
-#         self.map_matrix = var.map_matrix
-#         self.eaten_ghost = var.eaten_ghost
-#         self.speed = var.settings.ghosts_speed
-#
-#         self.centerx = var.rect.centerx
-#         self.centery = var.rect.centery
-#
-#         self.moving_right = var.moving_right
-#         self.moving_left = var.moving_left
-#         self.moving_up = var.moving_up
-#         self.moving_down = var.moving_down
-#
-#         self.x = var.x
-#         self.y = var.y
-#         self.turns = [False, False, False, False]
-#
-#         self.eaten = var.eaten
-#         self.in_box = var.in_box
-#
-#         self.ghost_targets = var.ghost_targets
 
 class Blinky():
     def __init__(self, var):
