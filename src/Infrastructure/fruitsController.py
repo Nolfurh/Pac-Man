@@ -43,7 +43,7 @@ class FruitsController:
                 self.fruit.eat_sound.play()
                 self.fruit = None
             else:
-                if int(time.thread_time()) - int(self.time_of_fruit_creation) == self.fruit.time_until_disappear:
+                if int(time.process_time()) - int(self.time_of_fruit_creation) == self.fruit.time_until_disappear:
                     self.fruit = None
                     self.time_of_fruit_creation = None
         else:
