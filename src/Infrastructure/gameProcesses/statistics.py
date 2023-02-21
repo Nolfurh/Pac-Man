@@ -9,5 +9,5 @@ class Statistics:
 
     @staticmethod
     def check_win():
-        if Statistics.collectedPacDots >= Statistics.allPacDots:
+        if Statistics.collectedPacDots >= Statistics.allPacDots and not Statistics.lose:
             Statistics.win = True
