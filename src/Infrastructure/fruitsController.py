@@ -20,11 +20,11 @@ class FruitsController:
         self.fruit_appeared = False
         self.fruit = None
         self.time_of_fruit_creation = None
-        self.start_time = time.thread_time()
+        self.start_time = time.process_time()
 
     def spawn_fruit(self):
         self.fruit = fruits.Cherry()
-        self.time_of_fruit_creation = time.thread_time()
+        self.time_of_fruit_creation = time.process_time()
         self.draw_fruit(self.fruit)
 
     def draw_fruit(self, fruit):
@@ -47,10 +47,10 @@ class FruitsController:
                     self.fruit = None
                     self.time_of_fruit_creation = None
         else:
-            if int(time.thread_time()) - int(self.start_time) == self.time_to_fruit_appearing1 and not self.first_fruit_appeared:
+            if int(time.process_time()) - int(self.start_time) == self.time_to_fruit_appearing1 and not self.first_fruit_appeared:
                 self.spawn_fruit()
                 self.first_fruit_appeared = True
 
-            if int(time.thread_time()) - int(self.start_time) == self.time_to_fruit_appearing2 and not self.second_fruit_appeared:
+            if int(time.process_time()) - int(self.start_time) == self.time_to_fruit_appearing2 and not self.second_fruit_appeared:
                 self.spawn_fruit()
                 self.second_fruit_appeared = True
