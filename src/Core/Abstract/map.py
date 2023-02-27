@@ -4,13 +4,45 @@ from src.Infrastructure.gameCore import GameSettings
 
 
 class GameMap:
+    """
+    A class representing the game map.
+
+    Attributes
+    ----------
+    settings : Settings
+        A settings object containing information about the game settings.
+    map_matrix : list of lists of ints
+        A 2D array representing the map.
+    screen : Surface
+        A Pygame Surface object representing the game screen.
+    totalPacDots : int
+        The total number of Pac-Dots on the map.
+
+    Methods
+    -------
+    draw_map()
+        Draws the map on the screen.
+    get_PacDots()
+        Returns the total number of Pac-Dots on the map.
+    """
     def __init__(self, settings):
+        """
+        Constructs a new GameMap object.
+
+        Parameters
+        ----------
+        settings : Settings
+            A settings object containing information about the game settings.
+        """
         self.settings = settings
         self.map_matrix = [[]]
         self.screen = pg.display.set_mode((self.settings.screen_width, self.settings.screen_height))
         self.totalPacDots = self.get_PacDots()
 
     def draw_map(self):
+        """
+        Draws the map on the screen.
+        """
         x_pos = self.settings.screen_width // 30
         y_pos = (self.settings.screen_height - 50) // 32
         for i in range(len(self.map_matrix)):
@@ -48,6 +80,14 @@ class GameMap:
                                  (j * x_pos + x_pos, i * y_pos + (0.5 * y_pos)), 3)
 
     def get_PacDots(self):
+        """
+        Returns the total number of Pac-Dots on the map.
+
+        Returns
+        -------
+        int
+            The total number of Pac-Dots on the map.
+        """
         pac_dots = 0
 
         for i in range(len(self.map_matrix)):

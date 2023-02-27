@@ -5,7 +5,67 @@ from src.Infrastructure.gameProcesses.statistics import Statistics
 from  src.Infrastructure.gameProcesses import fruits, bonuses
 
 class Pacman:
+    """
+    A class representing Pacman character in the game.
+    It is responsible for controlling Pacman's movement, animation, and behavior in the game.
+
+    Attributes:
+    -----------
+    screen : pygame.Surface
+        The screen on which the Pacman object will be displayed.
+    screen_rect : pygame.Rect
+        A rectangular area that defines the dimensions of the screen.
+    spritesheet : list
+        A list containing Pacman's sprite images.
+    current_sprite : int
+        The current sprite index in the spritesheet list.
+    image : pygame.Surface
+        The image object for the current sprite.
+    rect : pygame.Rect
+        A rectangular area that defines the dimensions and location of the image on the screen.
+    settings : Settings
+        The game settings object.
+    map_matrix : list
+        A list containing the game map matrix.
+    moving_right : bool
+        A flag that indicates if Pacman is moving right.
+    moving_left : bool
+        A flag that indicates if Pacman is moving left.
+    moving_up : bool
+        A flag that indicates if Pacman is moving up.
+    moving_down : bool
+        A flag that indicates if Pacman is moving down.
+    x : float
+        The x-coordinate of the Pacman object on the screen.
+    y : float
+        The y-coordinate of the Pacman object on the screen.
+    turns : list
+        A list containing boolean values that indicate if Pacman can make a turn in each direction.
+    clock : pygame.time.Clock
+        A clock object to keep track of time in the game.
+
+    Methods:
+    --------
+    update():
+        Updates the position and behavior of the Pacman object.
+    check_position():
+        Checks if Pacman can move in a certain direction based on the game map matrix.
+    animate():
+        Animates the Pacman object by updating the current sprite image index.
+    eat():
+        Removes the food object from the game map if Pacman collides with it.
+    blitme():
+        Draws objects on the screen
+    """
     def __init__(self, var):
+        """
+        Initializes the Pacman object.
+
+        Parameters:
+        -----------
+        var : VariableContainer
+            A container object that contains various game variables.
+        """
         self.screen = var.screen
         self.screen_rect = var.screen.get_rect()
 
@@ -36,6 +96,9 @@ class Pacman:
 
 
     def update(self):
+        """
+        Updates the position and behavior of the Pacman object.
+        """
         delta_time = self.clock.tick()
         self.check_position()
         if self.moving_right and self.turns[0]:
@@ -88,6 +151,9 @@ class Pacman:
         self.eat()
 
     def check_position(self):
+        """
+        Checks if Pacman can move in a certain direction based on the game map matrix.
+        """
         x_pos = self.settings.screen_width // 30
         y_pos = (self.settings.screen_height - 50) // 32
         tweaker_1 = 15
@@ -138,7 +204,9 @@ class Pacman:
         return self.turns
 
     def blitme(self):
-        # self.screen.blit(self.image, self.rect)
+        """
+        Draws objects on the screen
+        """
 
         img = self.image
 
@@ -157,6 +225,9 @@ class Pacman:
         self.screen.blit(img, self.rect)
 
     def animate(self):
+        """
+        Animates the Pacman object by updating the current sprite image index.
+        """
         self.current_sprite += 1
         if self.current_sprite >= len(self.spritesheet):
             self.current_sprite = 0
@@ -164,6 +235,9 @@ class Pacman:
         self.image = self.spritesheet[self.current_sprite]
 
     def eat(self):
+        """
+        Removes the food object from the game map if Pacman collides with it.
+        """
         x_pos = self.settings.screen_width // 30
         y_pos = (self.settings.screen_height - 50) // 32
         centerx = self.x + 17

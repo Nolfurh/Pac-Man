@@ -1,7 +1,39 @@
 import argparse
 
 class pacmd:
+    """
+    Class for parsing command-line arguments and changing game settings accordingly.
+
+    Parameters
+    ----------
+    settings : Settings
+        The game settings.
+
+    Attributes
+    ----------
+    parser : argparse.ArgumentParser
+        An ArgumentParser object for parsing command-line arguments.
+    settings : Settings
+        The game settings.
+    args : argparse.Namespace
+        An object containing the parsed arguments.
+
+    Methods
+    -------
+    parse_cmd()
+        Parses the command-line arguments and changes the game settings accordingly.
+
+    """
     def __init__(self, settings):
+        """
+        Initialize the pacmd object.
+
+        Parameters
+        ----------
+        settings : Settings
+            The game settings.
+
+        """
         self.parser = argparse.ArgumentParser()
         self.settings = settings
 
@@ -15,6 +47,9 @@ class pacmd:
         self.args = self.parser.parse_args()
 
     def parse_cmd(self):
+        """
+        Parses the command-line arguments and changes the game settings accordingly.
+        """
         if self.args.command:
             if self.args.command == 'change-settings':
                 if self.args.item == 'wall-color':

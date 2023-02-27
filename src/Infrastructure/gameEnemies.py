@@ -4,7 +4,40 @@ import pygame as pg
 from src.Infrastructure.gameProcesses.statistics import Statistics
 
 class PositionCheck():
+    """
+    A class that checks the position of the object.
+
+    Parameters:
+    -----------
+    var: object
+        An object that contains necessary parameters like screen width, screen height,
+        current position of the object, current movement direction and current state.
+
+    Notes:
+    ------
+    This class modifies the object variable 'turns' to indicate which directions are available
+    for the object to move. 'turns' is a list of booleans, representing the availability to move
+    in four directions: up, down, left, and right. If the boolean value is True, then the move is
+    possible. Otherwise, it is not.
+    """
+
     def check_position(self, var):
+        """
+        Checks the position of the object and sets the 'turns' attribute of the given object.
+
+        Parameters:
+        -----------
+        var: object
+            An object that contains necessary parameters like screen width, screen height,
+            current position of the object, current movement direction and current state.
+
+        Notes:
+        ------
+        This method modifies the object variable 'turns' to indicate which directions are available
+        for the object to move. 'turns' is a list of booleans, representing the availability to move
+        in four directions: up, down, left, and right. If the boolean value is True, then the move is
+        possible. Otherwise, it is not.
+        """
         x_pos = var.settings.screen_width // 30
         y_pos = (var.settings.screen_height - 50) // 32
         tweaker = 15

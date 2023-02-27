@@ -13,8 +13,54 @@ from src.Core.Abstract.enemy import Ghosts
 from src.Infrastructure.pacmanCMD import pacmd
 
 class PackManWorld():
+    """
+    The main class for the Pac-Man game.
+
+    Attributes:
+    -----------
+    settings : GameSettings
+        The instance of GameSettings.
+    pacmd : pacmd
+        The instance of pacmd, which is responsible for parsing command line arguments.
+    screen : Surface
+        The screen on which the game will be displayed.
+    game_map : Level_1
+        The instance of Level_1, which is responsible for generating the map of the game.
+    player : Pacman
+        The instance of Pacman, which represents the player character in the game.
+    events : Events
+        The instance of Events, which handles the input events.
+    statistics : Statistics
+        The instance of Statistics, which holds the game statistics.
+    statistics_view : StatisticsView
+        The instance of StatisticsView, which is responsible for displaying the game statistics on the screen.
+    fruitsController : FruitsController
+        The instance of FruitsController, which is responsible for the fruits appearing in the game.
+    vulnerable : Surface
+        The image of the vulnerable ghost, which is displayed on the screen.
+    rect : Rect
+        The rectangle representing the vulnerable ghost on the screen.
+    playerx : int
+        The x-coordinate of the player.
+    playery : int
+        The y-coordinate of the player.
+    ghosts : Ghosts
+        The instance of Ghosts, which represents the enemy characters in the game.
+    beginning_sound : Sound
+        The sound played at the beginning of the game.
+
+    Methods:
+    --------
+    run_game()
+        The main game loop, responsible for running the game.
+    _update_screen()
+        Draws the on-screen objects of the game.
+    """
 
     def __init__(self):
+        """
+        Initializes the PackManWorld class. Initializes the pygame module and sets the attributes of the class.
+        """
         pg.init()
 
         self.settings = GameSettings()
@@ -47,6 +93,12 @@ class PackManWorld():
 
     # main game loop
     def run_game(self):
+        """
+        The main game loop, responsible for running the game. Calls the _update_screen(), checks the input events
+        with events.check_events(), updates the player and fruitsController with player.update() and
+        fruitsController.fruit_controller_update(), updates the ghosts with ghosts.update(), and redraws the last
+        frames on the screen with pg.display.flip().
+        """
         while True:
             self._update_screen()
             self.events.check_events()
@@ -60,6 +112,9 @@ class PackManWorld():
 
     # here on-screen objects will be
     def _update_screen(self):
+        """
+        Draws the on-screen objects of the game.
+        """
         self.screen.fill(self.settings.map_background)
         self.game_map.draw_map()
         self.statistics_view.ShowStatistics()
