@@ -184,7 +184,7 @@ class Blinky():
             if (player_circle.colliderect(self.rect)) and not self.eaten:
                 if Statistics.lives > 0:
                     Statistics.lives -= 1
-                    Statistics.activatedBonuses = []
+                    #Statistics.activatedBonuses = []
                     self.x = 300
                     self.y = 300
                     self.rect.x = self.x
@@ -201,7 +201,7 @@ class Blinky():
                     Statistics.lose = True
         if Statistics().activatedBonuses and player_circle.colliderect(self.rect) and not self.eaten:
             if Statistics.lives > 0:
-                Statistics.activatedBonuses = []
+                #Statistics.activatedBonuses = []
                 power_counter = 50
                 power_counter -= 1
                 self.x = 300
@@ -473,7 +473,7 @@ class Inky():
             if (player_circle.colliderect(self.rect)) and not self.eaten:
                 if Statistics.lives > 0:
                     Statistics.lives -= 1
-                    Statistics.activatedBonuses = []
+                    #Statistics.activatedBonuses = []
                     self.x = 300
                     self.y = 300
                     self.rect.x = self.x
@@ -492,7 +492,7 @@ class Inky():
                     Statistics.lose = True
         if Statistics().activatedBonuses and player_circle.colliderect(self.rect) and not self.eaten:
             if Statistics.lives > 0:
-                Statistics.activatedBonuses = []
+                #Statistics.activatedBonuses = []
                 power_counter = 50
                 power_counter -= 1
                 self.x = 300
@@ -721,7 +721,7 @@ class Pinky():
             if (player_circle.colliderect(self.rect)) and not self.eaten:
                 if Statistics.lives > 0:
                     Statistics.lives -= 1
-                    Statistics.activatedBonuses = []
+                    #Statistics.activatedBonuses = []
                     self.x = 300
                     self.y = 300
                     self.rect.x = self.x
@@ -740,7 +740,7 @@ class Pinky():
                     Statistics.lose = True
         if Statistics().activatedBonuses and player_circle.colliderect(self.rect) and not self.eaten:
             if Statistics.lives > 0:
-                Statistics.activatedBonuses = []
+                #Statistics.activatedBonuses = []
                 power_counter = 50
                 power_counter -= 1
                 self.x = 300
@@ -985,7 +985,7 @@ class Clyde():
             if (player_circle.colliderect(self.rect)) and not self.eaten:
                 if Statistics.lives > 0:
                     Statistics.lives -= 1
-                    Statistics.activatedBonuses = []
+                    #Statistics.activatedBonuses = []
                     self.x = 300
                     self.y = 300
                     self.rect.x = self.x
@@ -1004,7 +1004,7 @@ class Clyde():
                     Statistics.lose = True
         if Statistics().activatedBonuses and player_circle.colliderect(self.rect) and not self.eaten:
             if Statistics.lives > 0:
-                Statistics.activatedBonuses = []
+                #Statistics.activatedBonuses = []
                 power_counter = 50
                 power_counter -= 1
                 self.x = 300
