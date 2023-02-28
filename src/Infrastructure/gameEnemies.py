@@ -117,6 +117,9 @@ class PositionCheck():
         return var.turns, var.in_box
 
 class Blinky():
+    """
+    Blinky object with draw, update, and move functions
+    """
     def __init__(self, var):
         self.image = pg.transform.scale(pg.image.load('src/Core/images/blinky.png'), (35, 35))
         self.vulnerable = var.vulnerable
@@ -158,6 +161,9 @@ class Blinky():
         # self.ghost_set = GhostSet(self)
 
     def update(self, var):
+        """
+        Update in a loop all data about ghost
+        """
         self.ghost_targets = var.ghost_targets[0]
         self.eaten_ghost = var.eaten_ghost
 
@@ -170,6 +176,9 @@ class Blinky():
         self.result_collision()
 
     def result_collision(self):
+        """
+        Check whether it is possible to move any direction
+        """
         player_circle = pg.draw.circle(self.screen, 'gray', (self.player_x, self.player_y), 21, 2)
         if not Statistics().activatedBonuses:
             if (player_circle.colliderect(self.rect)) and not self.eaten:
@@ -222,6 +231,9 @@ class Blinky():
                 self.cooldown = 250
 
     def draw(self):
+        """
+        Drawing an updated ghost object, adding to loop
+        """
         center_x = self.rect.x + 17
         center_y = self.rect.y + 17
         if not Statistics().activatedBonuses and not self.eaten:
@@ -234,6 +246,9 @@ class Blinky():
         return ghost_rect
 
     def move_blinky(self):
+        """
+        Move ghost on matrix based on possibility conditions
+        """
         delta_time = self.clock.tick()
 
         if self.moving_right:
@@ -391,6 +406,9 @@ class Blinky():
         #return self.rect.x, self.rect.y, self.moving_left, self.moving_right, self.moving_up, self.moving_down
 
 class Inky():
+    """
+    Inky object with draw, update, and move functions
+    """
     def __init__(self, var):
         self.image = pg.transform.scale(pg.image.load('src/Core/images/inky.png'), (35, 35))
         self.vulnerable = var.vulnerable
@@ -432,6 +450,9 @@ class Inky():
         # self.ghost_set = GhostSet(self)
 
     def update(self, var):
+        """
+        Update in a loop all data about ghost
+        """
         self.ghost_targets = var.ghost_targets[0]
         self.eaten_ghost = var.eaten_ghost
 
@@ -444,6 +465,9 @@ class Inky():
         self.result_collision()
 
     def result_collision(self):
+        """
+        Check whether it is possible to move any direction
+        """
         player_circle = pg.draw.circle(self.screen, 'black', (self.player_x, self.player_y), 21, 2)
         if not Statistics().activatedBonuses:
             if (player_circle.colliderect(self.rect)) and not self.eaten:
@@ -497,6 +521,9 @@ class Inky():
                 self.cooldown = 250
 
     def draw(self):
+        """
+        Drawing an updated ghost object, adding to loop
+        """
         center_x = self.rect.x + 17
         center_y = self.rect.y + 17
         if not Statistics().activatedBonuses and not self.eaten:
@@ -509,6 +536,9 @@ class Inky():
         return ghost_rect
 
     def move_inky(self):
+        """
+        Move ghost on matrix based on possibility conditions
+        """
         delta_time = self.clock.tick()
 
         # blinky is going to turn whenever colliding with walls, otherwise continue straight
@@ -624,6 +654,9 @@ class Inky():
         return self.rect.x, self.rect.y, self.moving_left, self.moving_right, self.moving_up, self.moving_down
 
 class Pinky():
+    """
+    Pinky object with draw, update, and move functions
+    """
     def __init__(self, var):
         self.image = pg.transform.scale(pg.image.load('src/Core/images/pinky.png'), (35, 35))
         self.vulnerable = var.vulnerable
@@ -665,6 +698,9 @@ class Pinky():
         # self.ghost_set = GhostSet(self)
 
     def update(self, var):
+        """
+        Update in a loop all data about ghost
+        """
         self.ghost_targets = var.ghost_targets[0]
         self.eaten_ghost = var.eaten_ghost
 
@@ -677,6 +713,9 @@ class Pinky():
         self.result_collision()
 
     def result_collision(self):
+        """
+        Check whether it is possible to move any direction
+        """
         player_circle = pg.draw.circle(self.screen, 'black', (self.player_x, self.player_y), 21, 2)
         if not Statistics().activatedBonuses:
             if (player_circle.colliderect(self.rect)) and not self.eaten:
@@ -730,6 +769,9 @@ class Pinky():
                 self.cooldown = 250
 
     def draw(self):
+        """
+        Drawing an updated ghost object, adding to loop
+        """
         center_x = self.rect.x + 17
         center_y = self.rect.y + 17
         if not Statistics().activatedBonuses and not self.eaten:
@@ -742,6 +784,9 @@ class Pinky():
         return ghost_rect
 
     def move_pinky(self):
+        """
+        Move ghost on matrix based on possibility conditions
+        """
         delta_time = self.clock.tick()
 
         # inky turns up or down at any point to pursue, but left and right only on collision
@@ -873,6 +918,9 @@ class Pinky():
         return self.rect.x, self.rect.y, self.moving_left, self.moving_right, self.moving_up, self.moving_down
 
 class Clyde():
+    """
+    Clyde object with draw, update, and move functions
+    """
     def __init__(self, var):
         self.image = pg.transform.scale(pg.image.load('src/Core/images/clyde.png'), (35, 35))
         self.vulnerable = var.vulnerable
@@ -914,6 +962,9 @@ class Clyde():
         # self.ghost_set = GhostSet(self)
 
     def update(self, var):
+        """
+        Update in a loop all data about ghost
+        """
         self.ghost_targets = var.ghost_targets[0]
         self.eaten_ghost = var.eaten_ghost
 
@@ -926,6 +977,9 @@ class Clyde():
         self.result_collision()
 
     def result_collision(self):
+        """
+        Check whether it is possible to move any direction
+        """
         player_circle = pg.draw.circle(self.screen, 'black', (self.player_x, self.player_y), 21, 2)
         if not Statistics().activatedBonuses:
             if (player_circle.colliderect(self.rect)) and not self.eaten:
@@ -979,6 +1033,9 @@ class Clyde():
                 self.cooldown = 250
 
     def draw(self):
+        """
+        Drawing an updated ghost object, adding to loop
+        """
         center_x = self.rect.x + 17
         center_y = self.rect.y + 17
         if not Statistics().activatedBonuses and not self.eaten:
@@ -991,6 +1048,9 @@ class Clyde():
         return ghost_rect
 
     def move_clyde(self):
+        """
+        Move ghost on matrix based on possibility conditions
+        """
         delta_time = self.clock.tick()
 
         if self.moving_right:
