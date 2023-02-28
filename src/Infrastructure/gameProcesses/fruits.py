@@ -5,7 +5,13 @@ from src.Core.Abstract import item
 
 
 class PacDot(item.FruitEntity):
+    """
+    A class that representing the Pac dot, concrete realisation of fruit
+    """
     def __init__(self):
+        """
+        Initializes the Pac dot object.
+        """
         super().__init__()
         self.score = 5
         self.eat_sound = pygame.mixer.Sound(os.path.join('src', os.path.join('Core',
@@ -14,7 +20,13 @@ class PacDot(item.FruitEntity):
 
 
 class Cherry(item.FruitEntity):
+    """
+    A class that representing the cherry, concrete realisation of fruit
+    """
     def __init__(self):
+        """
+        Initializes the cherry object.
+        """
         super().__init__()
         self.score = 100
         self.time_until_disappear = 10

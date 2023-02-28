@@ -2,6 +2,9 @@ from src.Core.Abstract.map import GameMap
 
 
 class Level_1(GameMap):
+    """
+    Concrete realisation of first map
+    """
     def __init__(self, settings):
         super().__init__(settings)
         self.map_matrix = [
