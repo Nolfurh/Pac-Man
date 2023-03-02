@@ -25,7 +25,7 @@ class PowerPellet(item.BonusEntity):
         Statistics.activatedBonuses.remove(self)
         
     @staticmethod
-    def use(statistics):
+    def use():
         """
         Not implemented
         :param statistics: A statistics object containing information about the game statistics.

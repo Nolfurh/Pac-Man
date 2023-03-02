@@ -1,43 +1,33 @@
 import os
+from abc import ABC, abstractmethod
 
 import pygame as pg
 from src.Infrastructure.gameProcesses.statistics import Statistics
 
-class PositionCheck():
-    """
-    A class that checks the position of the object.
+class MovementAlgorithm(ABC):
 
-    Parameters:
-    -----------
-    var: object
-        An object that contains necessary parameters like screen width, screen height,
-        current position of the object, current movement direction and current state.
+    @abstractmethod
+    def do_algorithm(self, var):
+        pass
 
-    Notes:
-    ------
-    This class modifies the object variable 'turns' to indicate which directions are available
-    for the object to move. 'turns' is a list of booleans, representing the availability to move
-    in four directions: up, down, left, and right. If the boolean value is True, then the move is
-    possible. Otherwise, it is not.
-    """
+class GhostMovement():
+
+    def __init__(self, movementAlgorithm: MovementAlgorithm) -> None:
+        self._movementAlgorithm = movementAlgorithm
+
+    @property
+    def movementAlgorithm(self):
+        return self._movementAlgorithm
+
+    @movementAlgorithm.setter
+    def movementAlgorithm(self, movementAlgorithm: MovementAlgorithm) -> None:
+        self._movementAlgorithm = movementAlgorithm
+
+    def do_movement(self, var) -> None:
+        self._movementAlgorithm.do_algorithm(var)
 
     def check_position(self, var):
-        """
-        Checks the position of the object and sets the 'turns' attribute of the given object.
 
-        Parameters:
-        -----------
-        var: object
-            An object that contains necessary parameters like screen width, screen height,
-            current position of the object, current movement direction and current state.
-
-        Notes:
-        ------
-        This method modifies the object variable 'turns' to indicate which directions are available
-        for the object to move. 'turns' is a list of booleans, representing the availability to move
-        in four directions: up, down, left, and right. If the boolean value is True, then the move is
-        possible. Otherwise, it is not.
-        """
         x_pos = var.settings.screen_width // 30
         y_pos = (var.settings.screen_height - 50) // 32
         tweaker = 15
@@ -116,10 +106,651 @@ class PositionCheck():
             var.in_box = False
         return var.turns, var.in_box
 
+    def check_collision(self, var):
+
+        player_circle = pg.draw.circle(var.screen, 'black', (var.player_x, var.player_y), 21, 2)
+        if not Statistics().activatedBonuses:
+            if (player_circle.colliderect(var.rect)) and not var.eaten:
+                if Statistics.lives > 0:
+                    Statistics.lives -= 1
+                    var.x = 300
+                    var.y = 300
+                    var.rect.x = var.x
+                    var.rect.y = var.y
+                    var.player.x = 50
+                    var.player.y = 50
+                    var.moving_right = True
+                    var.moving_left = False
+                    var.moving_up = False
+                    var.moving_down = False
+                    var.eaten_ghost = [False, False, False, False]
+                    var.eaten = False
+                else:
+                    Statistics.lose = True
+        if Statistics().activatedBonuses and player_circle.colliderect(var.rect) and not var.eaten:
+            if Statistics.lives > 0:
+                power_counter = 50
+                power_counter -= 1
+                var.x = 300
+                var.y = 300
+                var.rect.x = var.x
+                var.rect.y = var.y
+                var.moving_right = False
+                var.moving_left = False
+                var.moving_up = False
+                var.moving_down = False
+                var.eaten_ghost = [True, False, False, False]
+                var.eaten = True
+                var.eat_sound.play()
+                if power_counter == 1:
+                    var.eaten = False
+            else:
+                Statistics.lose = True
+                pg.mixer.Sound(os.path.join('src', os.path.join('Core',os.path.join('sounds', 'pacman_death.wav')))).play()
+        if var.eaten:
+            var.cooldown -= 1
+            if var.cooldown == 1:
+                var.eaten = False
+                var.moving_right = True
+                var.moving_left = False
+                var.moving_up = False
+                var.moving_down = False
+                var.cooldown = 250
+
+    def draw(self, var):
+
+        center_x = var.rect.x + 17
+        center_y = var.rect.y + 17
+        if not Statistics().activatedBonuses and not var.eaten:
+            var.screen.blit(var.image, (var.rect.x, var.rect.y))
+        elif Statistics().activatedBonuses and not var.eaten:
+            var.screen.blit(var.vulnerable, (var.x, var.y))
+        else:
+            var.screen.blit(var.spunky, (var.x, var.y))
+        ghost_rect = pg.rect.Rect((center_x - 17, center_y - 17), (35, 35))
+        return ghost_rect
+
+class ConcreteMovementOne(MovementAlgorithm):
+
+    def __init__(self):
+        self.clock = pg.time.Clock()
+
+    def do_algorithm(self, var):
+
+        delta_time = self.clock.tick()
+
+        if var.moving_right:
+            if var.ghost_targets[0] > var.rect.x and var.turns[0]:
+                var.x += var.speed * (delta_time / 10)
+            elif not var.turns[0]:
+                var.moving_right = False
+                if var.ghost_targets[1] > var.rect.y and var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                elif var.ghost_targets[1] < var.rect.y and var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                elif var.ghost_targets[0] < var.rect.x and var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+                elif var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                elif var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                elif var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+            elif var.turns[0]:
+                if var.ghost_targets[1] > var.rect.y and var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                    var.moving_right = False
+                if var.ghost_targets[1] < var.rect.y and var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                    var.moving_right = False
+                else:
+                    var.x += var.speed
+        elif var.moving_left:
+            if var.ghost_targets[1] > var.rect.y and var.turns[3]:
+                var.moving_down = True
+                var.moving_left = False
+            elif var.ghost_targets[0] < var.rect.x and var.turns[1]:
+                var.x -= var.speed * (delta_time / 10)
+            elif not var.turns[1]:
+                var.moving_left = False
+                if var.ghost_targets[1] > var.rect.y and var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                elif var.ghost_targets[1] < var.rect.y and var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                elif var.ghost_targets[0] > var.rect.x and var.turns[0]:
+                    var.moving_right = True
+                    var.x += var.speed * (delta_time / 10)
+                elif var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                elif var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                elif var.turns[0]:
+                    var.moving_right = True
+                    var.x += var.speed * (delta_time / 10)
+            elif var.turns[1]:
+                if var.ghost_targets[1] > var.rect.y and var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                    var.moving_left = False
+                if var.ghost_targets[1] < var.rect.y and var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                    var.moving_left = False
+                else:
+                    var.x -= var.speed * (delta_time / 10)
+        elif var.moving_up:
+            if var.ghost_targets[0] < var.rect.x and var.turns[1]:
+                var.moving_left = True
+                var.x -= var.speed * (delta_time / 10)
+                var.moving_up = False
+            elif var.ghost_targets[1] < var.rect.y and var.turns[2]:
+                var.moving_up = True
+                var.y -= var.speed * (delta_time / 10)
+            elif not var.turns[2]:
+                var.moving_up = False
+                if var.ghost_targets[0] > var.rect.x and var.turns[0]:
+                    var.moving_right = True
+                    var.x += var.speed * (delta_time / 10)
+                elif var.ghost_targets[0] < var.rect.x and var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+                elif var.ghost_targets[1] > var.rect.y and var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                elif var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+                elif var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                elif var.turns[0]:
+                    var.moving_right = True
+                    var.x += var.speed * (delta_time / 10)
+            elif var.turns[2]:
+                if var.ghost_targets[0] > var.rect.x and var.turns[0]:
+                    var.moving_right = True
+                    var.x += var.speed * (delta_time / 10)
+                    var.moving_up = False
+                elif var.ghost_targets[0] < var.rect.x and var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+                    var.moving_up = False
+                else:
+                    var.y -= var.speed * (delta_time / 10)
+        elif var.moving_down:
+            if var.ghost_targets[1] > var.rect.y and var.turns[3]:
+                var.y += var.speed * (delta_time / 10)
+            elif not var.turns[3]:
+                var.moving_down = False
+                if var.ghost_targets[0] > var.rect.x and var.turns[0]:
+                    var.moving_right = True
+                    var.x += var.speed * (delta_time / 10)
+                elif var.ghost_targets[0] < var.rect.x and var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+                elif var.ghost_targets[1] < var.rect.y and var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                elif var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                elif var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+                elif var.turns[0]:
+                    var.moving_right = True
+                    var.x += var.speed * (delta_time / 10)
+            elif var.turns[3]:
+                if var.ghost_targets[0] > var.rect.x and var.turns[0]:
+                    var.moving_right = True
+                    var.x += var.speed * (delta_time / 10)
+                    var.moving_down = False
+                elif var.ghost_targets[0] < var.rect.x and var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+                    var.moving_down = False
+                else:
+                    var.y += var.speed * (delta_time / 10)
+        if var.rect.x > 700:
+            var.x = -10
+            var.rect.x = var.x
+        elif var.rect.x < -10:
+            var.x = 700
+            var.rect.x = var.x
+        var.rect.x = var.x
+        var.rect.y = var.y
+        return var.rect.x, var.rect.y, var.moving_left, var.moving_right, var.moving_up, var.moving_down
+
+class ConcreteMovementTwo(MovementAlgorithm):
+    def __init__(self):
+        self.clock = pg.time.Clock()
+
+    def do_algorithm(self, var):
+    
+        delta_time = self.clock.tick()
+
+        if var.moving_right:
+            if var.ghost_targets[0] > var.x and var.turns[0]:
+                var.x += var.speed * (delta_time / 10)
+            elif not var.turns[0]:
+                var.moving_right = False
+                if var.ghost_targets[1] > var.y and var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                elif var.ghost_targets[1] < var.y and var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                elif var.ghost_targets[0] < var.x and var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+                elif var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                elif var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                elif var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+            elif var.turns[0]:
+                var.x += var.speed * (delta_time / 10)
+        elif var.moving_left:
+            if var.ghost_targets[0] < var.x and var.turns[1]:
+                var.x -= var.speed * (delta_time / 10)
+            elif not var.turns[1]:
+                var.moving_left = False
+                if var.ghost_targets[1] > var.y and var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                elif var.ghost_targets[1] < var.y and var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                elif var.ghost_targets[0] > var.x and var.turns[0]:
+                    var.moving_up = True
+                    var.x += var.speed * (delta_time / 10)
+                elif var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                elif var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                elif var.turns[0]:
+                    var.moving_up = True
+                    var.x += var.speed * (delta_time / 10)
+            elif var.turns[1]:
+                var.x -= var.speed * (delta_time / 10)
+        elif var.moving_up:
+            if var.ghost_targets[1] < var.y and var.turns[2]:
+                var.moving_up = True
+                var.y -= var.speed * (delta_time / 10)
+            elif not var.turns[2]:
+                var.moving_up = False
+                if var.ghost_targets[0] > var.x and var.turns[0]:
+                    var.moving_up = True
+                    var.x += var.speed * (delta_time / 10)
+                elif var.ghost_targets[0] < var.x and var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+                elif var.ghost_targets[1] > var.y and var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                elif var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                elif var.turns[0]:
+                    var.moving_up = True
+                    var.x += var.speed * (delta_time / 10)
+                elif var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+            elif var.turns[2]:
+                var.y -= var.speed * (delta_time / 10)
+        elif var.moving_down:
+            if var.ghost_targets[1] > var.y and var.turns[3]:
+                var.y += var.speed * (delta_time / 10)
+            elif not var.turns[3]:
+                var.moving_down = False
+                if var.ghost_targets[0] > var.x and var.turns[0]:
+                    var.moving_up = True
+                    var.x += var.speed * (delta_time / 10)
+                elif var.ghost_targets[0] < var.x and var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+                elif var.ghost_targets[1] < var.y and var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                elif var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                elif var.turns[0]:
+                    var.moving_up = True
+                    var.x += var.speed * (delta_time / 10)
+                elif var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+            elif var.turns[3]:
+                var.y += var.speed * (delta_time / 10)
+        if var.rect.x > 700:
+            var.x = -10
+            var.rect.x = var.x
+        elif var.rect.x < -10:
+            var.x = 700
+            var.rect.x = var.x
+        var.rect.x = var.x
+        var.rect.y = var.y
+        return var.rect.x, var.rect.y, var.moving_left, var.moving_right, var.moving_up, var.moving_down
+
+class ConcreteMovementThree(MovementAlgorithm):
+    def __init__(self):
+        self.clock = pg.time.Clock()
+    
+    def do_algorithm(self, var):
+
+        delta_time = var.clock.tick()
+
+        if var.moving_right:
+            if var.ghost_targets[0] > var.x and var.turns[0]:
+                var.x += var.speed * (delta_time / 10)
+            elif not var.turns[0]:
+                var.moving_right = False
+                if var.ghost_targets[1] > var.y and var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                elif var.ghost_targets[1] < var.y and var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                elif var.ghost_targets[0] < var.x and var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+                elif var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                elif var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                elif var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+            elif var.turns[0]:
+                if var.ghost_targets[1] > var.y and var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                if var.ghost_targets[1] < var.y and var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                else:
+                    var.x += var.speed * (delta_time / 10)
+        elif var.moving_left:
+            if var.ghost_targets[1] > var.y and var.turns[3]:
+                var.moving_down = True
+            elif var.ghost_targets[0] < var.x and var.turns[1]:
+                var.x -= var.speed * (delta_time / 10)
+            elif not var.turns[1]:
+                var.moving_left = False
+                if var.ghost_targets[1] > var.y and var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                elif var.ghost_targets[1] < var.y and var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                elif var.ghost_targets[0] > var.x and var.turns[0]:
+                    var.moving_right = True
+                    var.x += var.speed * (delta_time / 10)
+                elif var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                elif var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                elif var.turns[0]:
+                    var.moving_right = True
+                    var.x += var.speed * (delta_time / 10)
+            elif var.turns[1]:
+                if var.ghost_targets[1] > var.y and var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                if var.ghost_targets[1] < var.y and var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                else:
+                    var.x -= var.speed * (delta_time / 10)
+        elif var.moving_up:
+            if var.ghost_targets[1] < var.y and var.turns[2]:
+                var.moving_up = True
+                var.y -= var.speed * (delta_time / 10)
+            elif not var.turns[2]:
+                var.moving_up = False
+                if var.ghost_targets[0] > var.x and var.turns[0]:
+                    var.moving_right = True
+                    var.x += var.speed * (delta_time / 10)
+                elif var.ghost_targets[0] < var.x and var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+                elif var.ghost_targets[1] > var.y and var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                elif var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+                elif var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                elif var.turns[0]:
+                    var.moving_right = True
+                    var.x += var.speed * (delta_time / 10)
+            elif var.turns[2]:
+                var.y -= var.speed * (delta_time / 10)
+        elif var.moving_down:
+            if var.ghost_targets[1] > var.y and var.turns[3]:
+                var.y += var.speed * (delta_time / 10)
+            elif not var.turns[3]:
+                var.moving_down = False
+                if var.ghost_targets[0] > var.x and var.turns[0]:
+                    var.moving_right = True
+                    var.x += var.speed * (delta_time / 10)
+                elif var.ghost_targets[0] < var.x and var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+                elif var.ghost_targets[1] < var.y and var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                elif var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                elif var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+                elif var.turns[0]:
+                    var.moving_right = True
+                    var.x += var.speed * (delta_time / 10)
+            elif var.turns[3]:
+                var.y += var.speed * (delta_time / 10)
+        if var.rect.x > 700:
+            var.x = -10
+            var.rect.x = var.x
+        elif var.rect.x < -10:
+            var.x = 700
+            var.rect.x = var.x
+        var.rect.x = var.x
+        var.rect.y = var.y
+        return var.rect.x, var.rect.y, var.moving_left, var.moving_right, var.moving_up, var.moving_down
+
+class ConcreteMovementFour(MovementAlgorithm):
+    def __init__(self):
+        self.clock = pg.time.Clock()
+    
+    def do_algorithm(self, var):
+
+        delta_time = var.clock.tick()
+
+        if var.moving_right:
+            if var.ghost_targets[0] > var.rect.x and var.turns[0]:
+                var.x += var.speed * (delta_time / 10)
+            elif not var.turns[0]:
+                var.moving_right = False
+                if var.ghost_targets[1] > var.rect.y and var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                elif var.ghost_targets[1] < var.rect.y and var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                elif var.ghost_targets[0] < var.rect.x and var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+                elif var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                elif var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                elif var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+            elif var.turns[0]:
+                if var.ghost_targets[1] > var.rect.y and var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                    var.moving_right = False
+                if var.ghost_targets[1] < var.rect.y and var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                    var.moving_right = False
+                else:
+                    var.x += var.speed * (delta_time / 10)
+        elif var.moving_left:
+            if var.ghost_targets[1] > var.rect.y and var.turns[3]:
+                var.moving_down = True
+                var.moving_left = False
+            elif var.ghost_targets[0] < var.rect.x and var.turns[1]:
+                var.x -= var.speed * (delta_time / 10)
+            elif not var.turns[1]:
+                var.moving_left = False
+                if var.ghost_targets[1] > var.rect.y and var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                elif var.ghost_targets[1] < var.rect.y and var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                elif var.ghost_targets[0] > var.rect.x and var.turns[0]:
+                    var.moving_right = True
+                    var.x += var.speed * (delta_time / 10)
+                elif var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                elif var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                elif var.turns[0]:
+                    var.moving_right = True
+                    var.x += var.speed * (delta_time / 10)
+            elif var.turns[1]:
+                if var.ghost_targets[1] > var.rect.y and var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                    var.moving_left = False
+                if var.ghost_targets[1] < var.rect.y and var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                    var.moving_left = False
+                else:
+                    var.x -= var.speed * (delta_time / 10)
+        elif var.moving_up:
+            if var.ghost_targets[0] < var.rect.x and var.turns[1]:
+                var.moving_left = True
+                var.x -= var.speed * (delta_time / 10)
+                var.moving_up = False
+            elif var.ghost_targets[1] < var.rect.y and var.turns[2]:
+                var.moving_up = True
+                var.y -= var.speed * (delta_time / 10)
+            elif not var.turns[2]:
+                var.moving_up = False
+                if var.ghost_targets[0] > var.rect.x and var.turns[0]:
+                    var.moving_right = True
+                    var.x += var.speed * (delta_time / 10)
+                elif var.ghost_targets[0] < var.rect.x and var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+                elif var.ghost_targets[1] > var.rect.y and var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                elif var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+                elif var.turns[3]:
+                    var.moving_down = True
+                    var.y += var.speed * (delta_time / 10)
+                elif var.turns[0]:
+                    var.moving_right = True
+                    var.x += var.speed * (delta_time / 10)
+            elif var.turns[2]:
+                if var.ghost_targets[0] > var.rect.x and var.turns[0]:
+                    var.moving_right = True
+                    var.x += var.speed * (delta_time / 10)
+                    var.moving_up = False
+                elif var.ghost_targets[0] < var.rect.x and var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+                    var.moving_up = False
+                else:
+                    var.y -= var.speed * (delta_time / 10)
+        elif var.moving_down:
+            if var.ghost_targets[1] > var.rect.y and var.turns[3]:
+                var.y += var.speed * (delta_time / 10)
+            elif not var.turns[3]:
+                var.moving_down = False
+                if var.ghost_targets[0] > var.rect.x and var.turns[0]:
+                    var.moving_right = True
+                    var.x += var.speed * (delta_time / 10)
+                elif var.ghost_targets[0] < var.rect.x and var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+                elif var.ghost_targets[1] < var.rect.y and var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                elif var.turns[2]:
+                    var.moving_up = True
+                    var.y -= var.speed * (delta_time / 10)
+                elif var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+                elif var.turns[0]:
+                    var.moving_right = True
+                    var.x += var.speed * (delta_time / 10)
+            elif var.turns[3]:
+                if var.ghost_targets[0] > var.rect.x and var.turns[0]:
+                    var.moving_right = True
+                    var.x += var.speed * (delta_time / 10)
+                    var.moving_down = False
+                elif var.ghost_targets[0] < var.rect.x and var.turns[1]:
+                    var.moving_left = True
+                    var.x -= var.speed * (delta_time / 10)
+                    var.moving_down = False
+                else:
+                    var.y += var.speed * (delta_time / 10)
+        if var.rect.x > 700:
+            var.x = -10
+            var.rect.x = var.x
+        elif var.rect.x < -10:
+            var.x = 700
+            var.rect.x = var.x
+        var.rect.x = var.x
+        var.rect.y = var.y
+        return var.rect.x, var.rect.y, var.moving_left, var.moving_right, var.moving_up, var.moving_down
+
 class Blinky():
-    """
-    Blinky object with draw, update, and move functions
-    """
+
     def __init__(self, var):
         self.image = pg.transform.scale(pg.image.load('src/Core/images/blinky.png'), (35, 35))
         self.vulnerable = var.vulnerable
@@ -158,7 +789,7 @@ class Blinky():
                                                                                       'pacman_eatghost.wav'))))
         self.clock = pg.time.Clock()
 
-        # self.ghost_set = GhostSet(self)
+        self.ghostMovement = GhostMovement(ConcreteMovementOne())
 
     def update(self, var):
         """
@@ -170,240 +801,11 @@ class Blinky():
         self.player_x, self.player_y = var.player_x, var.player_y
         self.player = var.player
 
-        self.draw()
-        PositionCheck().check_position(self)
-        self.move_blinky()
-        self.result_collision()
+        self.ghostMovement.draw(self)
+        self.ghostMovement.check_position(self)
+        self.ghostMovement.do_movement(self)
+        self.ghostMovement.check_collision(self)
 
-    def result_collision(self):
-        """
-        Check whether it is possible to move any direction
-        """
-        player_circle = pg.draw.circle(self.screen, 'gray', (self.player_x, self.player_y), 21, 2)
-        if not Statistics().activatedBonuses:
-            if (player_circle.colliderect(self.rect)) and not self.eaten:
-                if Statistics.lives > 0:
-                    Statistics.lives -= 1
-                    #Statistics.activatedBonuses = []
-                    self.x = 300
-                    self.y = 300
-                    self.rect.x = self.x
-                    self.rect.y = self.y
-                    self.player.x = 50
-                    self.player.y = 50
-                    self.moving_right = True
-                    self.moving_left = False
-                    self.moving_up = False
-                    self.moving_down = False
-                    self.eaten_ghost = [False, False, False, False]
-                    self.eaten = False
-                else:
-                    Statistics.lose = True
-        if Statistics().activatedBonuses and player_circle.colliderect(self.rect) and not self.eaten:
-            if Statistics.lives > 0:
-                #Statistics.activatedBonuses = []
-                power_counter = 50
-                power_counter -= 1
-                self.x = 300
-                self.y = 300
-                self.rect.x = self.x
-                self.rect.y = self.y
-                self.moving_right = False
-                self.moving_left = False
-                self.moving_up = False
-                self.moving_down = False
-                self.eaten_ghost = [True, False, False, False]
-                self.eaten = True
-                self.eat_sound.play()
-                if power_counter == 1:
-                    self.eaten = False
-            else:
-                Statistics.lose = True
-                pg.mixer.Sound(os.path.join('src', os.path.join('Core',os.path.join('sounds', 'pacman_death.wav')))).play()
-        if self.eaten:
-            self.cooldown -= 1
-            if self.cooldown == 1:
-                self.eaten = False
-                self.moving_right = True
-                self.moving_left = False
-                self.moving_up = False
-                self.moving_down = False
-                self.cooldown = 250
-
-    def draw(self):
-        """
-        Drawing an updated ghost object, adding to loop
-        """
-        center_x = self.rect.x + 17
-        center_y = self.rect.y + 17
-        if not Statistics().activatedBonuses and not self.eaten:
-            self.screen.blit(self.image, (self.rect.x, self.rect.y))
-        elif Statistics().activatedBonuses and not self.eaten:
-            self.screen.blit(self.vulnerable, (self.x, self.y))
-        else:
-            self.screen.blit(self.spunky, (self.x, self.y))
-        ghost_rect = pg.rect.Rect((center_x - 17, center_y - 17), (35, 35))
-        return ghost_rect
-
-    def move_blinky(self):
-        """
-        Move ghost on matrix based on possibility conditions
-        """
-        delta_time = self.clock.tick()
-
-        if self.moving_right:
-            if self.ghost_targets[0] > self.rect.x and self.turns[0]:
-                self.x += self.speed * (delta_time / 10)
-            elif not self.turns[0]:
-                self.moving_right = False
-                if self.ghost_targets[1] > self.rect.y and self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                elif self.ghost_targets[1] < self.rect.y and self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                elif self.ghost_targets[0] < self.rect.x and self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-                elif self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                elif self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                elif self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-            elif self.turns[0]:
-                if self.ghost_targets[1] > self.rect.y and self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                    self.moving_right = False
-                if self.ghost_targets[1] < self.rect.y and self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                    self.moving_right = False
-                else:
-                    self.x += self.speed
-        elif self.moving_left:
-            if self.ghost_targets[1] > self.rect.y and self.turns[3]:
-                self.moving_down = True
-                self.moving_left = False
-            elif self.ghost_targets[0] < self.rect.x and self.turns[1]:
-                self.x -= self.speed * (delta_time / 10)
-            elif not self.turns[1]:
-                self.moving_left = False
-                if self.ghost_targets[1] > self.rect.y and self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                elif self.ghost_targets[1] < self.rect.y and self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                elif self.ghost_targets[0] > self.rect.x and self.turns[0]:
-                    self.moving_right = True
-                    self.x += self.speed * (delta_time / 10)
-                elif self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                elif self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                elif self.turns[0]:
-                    self.moving_right = True
-                    self.x += self.speed * (delta_time / 10)
-            elif self.turns[1]:
-                if self.ghost_targets[1] > self.rect.y and self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                    self.moving_left = False
-                if self.ghost_targets[1] < self.rect.y and self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                    self.moving_left = False
-                else:
-                    self.x -= self.speed * (delta_time / 10)
-        elif self.moving_up:
-            if self.ghost_targets[0] < self.rect.x and self.turns[1]:
-                self.moving_left = True
-                self.x -= self.speed * (delta_time / 10)
-                self.moving_up = False
-            elif self.ghost_targets[1] < self.rect.y and self.turns[2]:
-                self.moving_up = True
-                self.y -= self.speed * (delta_time / 10)
-            elif not self.turns[2]:
-                self.moving_up = False
-                if self.ghost_targets[0] > self.rect.x and self.turns[0]:
-                    self.moving_right = True
-                    self.x += self.speed * (delta_time / 10)
-                elif self.ghost_targets[0] < self.rect.x and self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-                elif self.ghost_targets[1] > self.rect.y and self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                elif self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-                elif self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                elif self.turns[0]:
-                    self.moving_right = True
-                    self.x += self.speed * (delta_time / 10)
-            elif self.turns[2]:
-                if self.ghost_targets[0] > self.rect.x and self.turns[0]:
-                    self.moving_right = True
-                    self.x += self.speed * (delta_time / 10)
-                    self.moving_up = False
-                elif self.ghost_targets[0] < self.rect.x and self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-                    self.moving_up = False
-                else:
-                    self.y -= self.speed * (delta_time / 10)
-        elif self.moving_down:
-            if self.ghost_targets[1] > self.rect.y and self.turns[3]:
-                self.y += self.speed * (delta_time / 10)
-            elif not self.turns[3]:
-                self.moving_down = False
-                if self.ghost_targets[0] > self.rect.x and self.turns[0]:
-                    self.moving_right = True
-                    self.x += self.speed * (delta_time / 10)
-                elif self.ghost_targets[0] < self.rect.x and self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-                elif self.ghost_targets[1] < self.rect.y and self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                elif self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                elif self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-                elif self.turns[0]:
-                    self.moving_right = True
-                    self.x += self.speed * (delta_time / 10)
-            elif self.turns[3]:
-                if self.ghost_targets[0] > self.rect.x and self.turns[0]:
-                    self.moving_right = True
-                    self.x += self.speed * (delta_time / 10)
-                    self.moving_down = False
-                elif self.ghost_targets[0] < self.rect.x and self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-                    self.moving_down = False
-                else:
-                    self.y += self.speed * (delta_time / 10)
-        if self.rect.x > 700:
-            self.x = -10
-            self.rect.x = self.x
-        elif self.rect.x < -10:
-            self.x = 700
-            self.rect.x = self.x
-        self.rect.x = self.x
-        self.rect.y = self.y
-        #return self.rect.x, self.rect.y, self.moving_left, self.moving_right, self.moving_up, self.moving_down
 
 class Inky():
     """
@@ -447,7 +849,8 @@ class Inky():
                                                                                       'pacman_eatghost.wav'))))
         self.clock = pg.time.Clock()
 
-        # self.ghost_set = GhostSet(self)
+
+        self.ghostMovement = GhostMovement(ConcreteMovementTwo())
 
     def update(self, var):
         """
@@ -459,199 +862,12 @@ class Inky():
         self.player_x, self.player_y = var.player_x, var.player_y
         self.player = var.player
 
-        self.draw()
-        PositionCheck().check_position(self)
-        self.move_inky()
-        self.result_collision()
+        self.ghostMovement.draw(self)
+        self.ghostMovement.check_position(self)
+        self.ghostMovement.do_movement(self)
+        self.ghostMovement.check_collision(self)
 
-    def result_collision(self):
-        """
-        Check whether it is possible to move any direction
-        """
-        player_circle = pg.draw.circle(self.screen, 'black', (self.player_x, self.player_y), 21, 2)
-        if not Statistics().activatedBonuses:
-            if (player_circle.colliderect(self.rect)) and not self.eaten:
-                if Statistics.lives > 0:
-                    Statistics.lives -= 1
-                    #Statistics.activatedBonuses = []
-                    self.x = 300
-                    self.y = 300
-                    self.rect.x = self.x
-                    self.rect.y = self.y
-                    self.player.x = 50
-                    self.player.y = 50
-                    self.moving_right = True
-                    self.moving_left = False
-                    self.moving_up = False
-                    self.moving_down = False
-                    self.eaten_ghost = [False, False, False, False]
-                    self.eaten = False
-                    pg.mixer.Sound(
-                        os.path.join('src', os.path.join('Core', os.path.join('sounds', 'pacman_death.wav')))).play()
-                else:
-                    Statistics.lose = True
-        if Statistics().activatedBonuses and player_circle.colliderect(self.rect) and not self.eaten:
-            if Statistics.lives > 0:
-                #Statistics.activatedBonuses = []
-                power_counter = 50
-                power_counter -= 1
-                self.x = 300
-                self.y = 300
-                self.rect.x = self.x
-                self.rect.y = self.y
-                self.moving_right = False
-                self.moving_left = False
-                self.moving_up = False
-                self.moving_down = False
-                self.eaten_ghost = [True, False, False, False]
-                self.eaten = True
-                self.eat_sound.play()
-                if power_counter == 1:
-                    self.eaten = False
-            else:
-                Statistics.lose = True
-        if self.eaten:
-            self.cooldown -= 1
-            if self.cooldown == 1:
-                self.eaten = False
-                self.moving_right = True
-                self.moving_left = False
-                self.moving_up = False
-                self.moving_down = False
-                self.cooldown = 250
 
-    def draw(self):
-        """
-        Drawing an updated ghost object, adding to loop
-        """
-        center_x = self.rect.x + 17
-        center_y = self.rect.y + 17
-        if not Statistics().activatedBonuses and not self.eaten:
-            self.screen.blit(self.image, (self.rect.x, self.rect.y))
-        elif Statistics().activatedBonuses and not self.eaten:
-            self.screen.blit(self.vulnerable, (self.x, self.y))
-        else:
-            self.screen.blit(self.spunky, (self.x, self.y))
-        ghost_rect = pg.rect.Rect((center_x - 17, center_y - 17), (35, 35))
-        return ghost_rect
-
-    def move_inky(self):
-        """
-        Move ghost on matrix based on possibility conditions
-        """
-        delta_time = self.clock.tick()
-
-        # blinky is going to turn whenever colliding with walls, otherwise continue straight
-        if self.moving_right:
-            if self.ghost_targets[0] > self.x and self.turns[0]:
-                self.x += self.speed * (delta_time / 10)
-            elif not self.turns[0]:
-                self.moving_right = False
-                if self.ghost_targets[1] > self.y and self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                elif self.ghost_targets[1] < self.y and self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                elif self.ghost_targets[0] < self.x and self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-                elif self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                elif self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                elif self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-            elif self.turns[0]:
-                self.x += self.speed * (delta_time / 10)
-        elif self.moving_left:
-            if self.ghost_targets[0] < self.x and self.turns[1]:
-                self.x -= self.speed * (delta_time / 10)
-            elif not self.turns[1]:
-                self.moving_left = False
-                if self.ghost_targets[1] > self.y and self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                elif self.ghost_targets[1] < self.y and self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                elif self.ghost_targets[0] > self.x and self.turns[0]:
-                    self.moving_up = True
-                    self.x += self.speed * (delta_time / 10)
-                elif self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                elif self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                elif self.turns[0]:
-                    self.moving_up = True
-                    self.x += self.speed * (delta_time / 10)
-            elif self.turns[1]:
-                self.x -= self.speed * (delta_time / 10)
-        elif self.moving_up:
-            if self.ghost_targets[1] < self.y and self.turns[2]:
-                self.moving_up = True
-                self.y -= self.speed * (delta_time / 10)
-            elif not self.turns[2]:
-                self.moving_up = False
-                if self.ghost_targets[0] > self.x and self.turns[0]:
-                    self.moving_up = True
-                    self.x += self.speed * (delta_time / 10)
-                elif self.ghost_targets[0] < self.x and self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-                elif self.ghost_targets[1] > self.y and self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                elif self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                elif self.turns[0]:
-                    self.moving_up = True
-                    self.x += self.speed * (delta_time / 10)
-                elif self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-            elif self.turns[2]:
-                self.y -= self.speed * (delta_time / 10)
-        elif self.moving_down:
-            if self.ghost_targets[1] > self.y and self.turns[3]:
-                self.y += self.speed * (delta_time / 10)
-            elif not self.turns[3]:
-                self.moving_down = False
-                if self.ghost_targets[0] > self.x and self.turns[0]:
-                    self.moving_up = True
-                    self.x += self.speed * (delta_time / 10)
-                elif self.ghost_targets[0] < self.x and self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-                elif self.ghost_targets[1] < self.y and self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                elif self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                elif self.turns[0]:
-                    self.moving_up = True
-                    self.x += self.speed * (delta_time / 10)
-                elif self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-            elif self.turns[3]:
-                self.y += self.speed * (delta_time / 10)
-        if self.rect.x > 700:
-            self.x = -10
-            self.rect.x = self.x
-        elif self.rect.x < -10:
-            self.x = 700
-            self.rect.x = self.x
-        self.rect.x = self.x
-        self.rect.y = self.y
-        return self.rect.x, self.rect.y, self.moving_left, self.moving_right, self.moving_up, self.moving_down
 
 class Pinky():
     """
@@ -695,7 +911,7 @@ class Pinky():
                                                                                       'pacman_eatghost.wav'))))
         self.clock = pg.time.Clock()
 
-        # self.ghost_set = GhostSet(self)
+        self.ghostMovement = GhostMovement(ConcreteMovementThree())
 
     def update(self, var):
         """
@@ -707,215 +923,12 @@ class Pinky():
         self.player_x, self.player_y = var.player_x, var.player_y
         self.player = var.player
 
-        self.draw()
-        PositionCheck().check_position(self)
-        self.move_pinky()
-        self.result_collision()
+        self.ghostMovement.draw(self)
+        self.ghostMovement.check_position(self)
+        self.ghostMovement.do_movement(self)
 
-    def result_collision(self):
-        """
-        Check whether it is possible to move any direction
-        """
-        player_circle = pg.draw.circle(self.screen, 'black', (self.player_x, self.player_y), 21, 2)
-        if not Statistics().activatedBonuses:
-            if (player_circle.colliderect(self.rect)) and not self.eaten:
-                if Statistics.lives > 0:
-                    Statistics.lives -= 1
-                    #Statistics.activatedBonuses = []
-                    self.x = 300
-                    self.y = 300
-                    self.rect.x = self.x
-                    self.rect.y = self.y
-                    self.player.x = 50
-                    self.player.y = 50
-                    self.moving_right = True
-                    self.moving_left = False
-                    self.moving_up = False
-                    self.moving_down = False
-                    self.eaten_ghost = [False, False, False, False]
-                    self.eaten = False
-                    pg.mixer.Sound(
-                        os.path.join('src', os.path.join('Core', os.path.join('sounds', 'pacman_death.wav')))).play()
-                else:
-                    Statistics.lose = True
-        if Statistics().activatedBonuses and player_circle.colliderect(self.rect) and not self.eaten:
-            if Statistics.lives > 0:
-                #Statistics.activatedBonuses = []
-                power_counter = 50
-                power_counter -= 1
-                self.x = 300
-                self.y = 300
-                self.rect.x = self.x
-                self.rect.y = self.y
-                self.moving_right = False
-                self.moving_left = False
-                self.moving_up = False
-                self.moving_down = False
-                self.eaten_ghost = [True, False, False, False]
-                self.eaten = True
-                self.eat_sound.play()
-                if power_counter == 1:
-                    self.eaten = False
-            else:
-                Statistics.lose = True
-        if self.eaten:
-            self.cooldown -= 1
-            if self.cooldown == 1:
-                self.eaten = False
-                self.moving_right = True
-                self.moving_left = False
-                self.moving_up = False
-                self.moving_down = False
-                self.cooldown = 250
+        self.ghostMovement.check_collision(self)
 
-    def draw(self):
-        """
-        Drawing an updated ghost object, adding to loop
-        """
-        center_x = self.rect.x + 17
-        center_y = self.rect.y + 17
-        if not Statistics().activatedBonuses and not self.eaten:
-            self.screen.blit(self.image, (self.rect.x, self.rect.y))
-        elif Statistics().activatedBonuses and not self.eaten:
-            self.screen.blit(self.vulnerable, (self.x, self.y))
-        else:
-            self.screen.blit(self.spunky, (self.x, self.y))
-        ghost_rect = pg.rect.Rect((center_x - 17, center_y - 17), (35, 35))
-        return ghost_rect
-
-    def move_pinky(self):
-        """
-        Move ghost on matrix based on possibility conditions
-        """
-        delta_time = self.clock.tick()
-
-        # inky turns up or down at any point to pursue, but left and right only on collision
-        if self.moving_right:
-            if self.ghost_targets[0] > self.x and self.turns[0]:
-                self.x += self.speed * (delta_time / 10)
-            elif not self.turns[0]:
-                self.moving_right = False
-                if self.ghost_targets[1] > self.y and self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                elif self.ghost_targets[1] < self.y and self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                elif self.ghost_targets[0] < self.x and self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-                elif self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                elif self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                elif self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-            elif self.turns[0]:
-                if self.ghost_targets[1] > self.y and self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                if self.ghost_targets[1] < self.y and self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                else:
-                    self.x += self.speed * (delta_time / 10)
-        elif self.moving_left:
-            if self.ghost_targets[1] > self.y and self.turns[3]:
-                self.moving_down = True
-            elif self.ghost_targets[0] < self.x and self.turns[1]:
-                self.x -= self.speed * (delta_time / 10)
-            elif not self.turns[1]:
-                self.moving_left = False
-                if self.ghost_targets[1] > self.y and self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                elif self.ghost_targets[1] < self.y and self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                elif self.ghost_targets[0] > self.x and self.turns[0]:
-                    self.moving_right = True
-                    self.x += self.speed * (delta_time / 10)
-                elif self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                elif self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                elif self.turns[0]:
-                    self.moving_right = True
-                    self.x += self.speed * (delta_time / 10)
-            elif self.turns[1]:
-                if self.ghost_targets[1] > self.y and self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                if self.ghost_targets[1] < self.y and self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                else:
-                    self.x -= self.speed * (delta_time / 10)
-        elif self.moving_up:
-            if self.ghost_targets[1] < self.y and self.turns[2]:
-                self.moving_up = True
-                self.y -= self.speed * (delta_time / 10)
-            elif not self.turns[2]:
-                self.moving_up = False
-                if self.ghost_targets[0] > self.x and self.turns[0]:
-                    self.moving_right = True
-                    self.x += self.speed * (delta_time / 10)
-                elif self.ghost_targets[0] < self.x and self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-                elif self.ghost_targets[1] > self.y and self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                elif self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-                elif self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                elif self.turns[0]:
-                    self.moving_right = True
-                    self.x += self.speed * (delta_time / 10)
-            elif self.turns[2]:
-                self.y -= self.speed * (delta_time / 10)
-        elif self.moving_down:
-            if self.ghost_targets[1] > self.y and self.turns[3]:
-                self.y += self.speed * (delta_time / 10)
-            elif not self.turns[3]:
-                self.moving_down = False
-                if self.ghost_targets[0] > self.x and self.turns[0]:
-                    self.moving_right = True
-                    self.x += self.speed * (delta_time / 10)
-                elif self.ghost_targets[0] < self.x and self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-                elif self.ghost_targets[1] < self.y and self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                elif self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                elif self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-                elif self.turns[0]:
-                    self.moving_right = True
-                    self.x += self.speed * (delta_time / 10)
-            elif self.turns[3]:
-                self.y += self.speed * (delta_time / 10)
-        if self.rect.x > 700:
-            self.x = -10
-            self.rect.x = self.x
-        elif self.rect.x < -10:
-            self.x = 700
-            self.rect.x = self.x
-        self.rect.x = self.x
-        self.rect.y = self.y
-        return self.rect.x, self.rect.y, self.moving_left, self.moving_right, self.moving_up, self.moving_down
 
 class Clyde():
     """
@@ -959,7 +972,7 @@ class Clyde():
                                                                                           'pacman_eatghost.wav'))))
         self.clock = pg.time.Clock()
 
-        # self.ghost_set = GhostSet(self)
+        self.ghostMovement = GhostMovement(ConcreteMovementFour())
 
     def update(self, var):
         """
@@ -971,238 +984,7 @@ class Clyde():
         self.player_x, self.player_y = var.player_x, var.player_y
         self.player = var.player
 
-        self.draw()
-        PositionCheck().check_position(self)
-        self.move_clyde()
-        self.result_collision()
-
-    def result_collision(self):
-        """
-        Check whether it is possible to move any direction
-        """
-        player_circle = pg.draw.circle(self.screen, 'black', (self.player_x, self.player_y), 21, 2)
-        if not Statistics().activatedBonuses:
-            if (player_circle.colliderect(self.rect)) and not self.eaten:
-                if Statistics.lives > 0:
-                    Statistics.lives -= 1
-                    #Statistics.activatedBonuses = []
-                    self.x = 300
-                    self.y = 300
-                    self.rect.x = self.x
-                    self.rect.y = self.y
-                    self.player.x = 50
-                    self.player.y = 50
-                    self.moving_right = True
-                    self.moving_left = False
-                    self.moving_up = False
-                    self.moving_down = False
-                    self.eaten_ghost = [False, False, False, False]
-                    self.eaten = False
-                    pg.mixer.Sound(
-                        os.path.join('src', os.path.join('Core', os.path.join('sounds', 'pacman_death.wav')))).play()
-                else:
-                    Statistics.lose = True
-        if Statistics().activatedBonuses and player_circle.colliderect(self.rect) and not self.eaten:
-            if Statistics.lives > 0:
-                #Statistics.activatedBonuses = []
-                power_counter = 50
-                power_counter -= 1
-                self.x = 300
-                self.y = 300
-                self.rect.x = self.x
-                self.rect.y = self.y
-                self.moving_right = False
-                self.moving_left = False
-                self.moving_up = False
-                self.moving_down = False
-                self.eaten_ghost = [True, False, False, False]
-                self.eaten = True
-                self.eat_sound.play()
-                if power_counter == 1:
-                    self.eaten = False
-            else:
-                Statistics.lose = True
-        if self.eaten:
-            self.cooldown -= 1
-            if self.cooldown == 1:
-                self.eaten = False
-                self.moving_right = True
-                self.moving_left = False
-                self.moving_up = False
-                self.moving_down = False
-                self.cooldown = 250
-
-    def draw(self):
-        """
-        Drawing an updated ghost object, adding to loop
-        """
-        center_x = self.rect.x + 17
-        center_y = self.rect.y + 17
-        if not Statistics().activatedBonuses and not self.eaten:
-            self.screen.blit(self.image, (self.rect.x, self.rect.y))
-        elif Statistics().activatedBonuses and not self.eaten:
-            self.screen.blit(self.vulnerable, (self.x, self.y))
-        else:
-            self.screen.blit(self.spunky, (self.x, self.y))
-        ghost_rect = pg.rect.Rect((center_x - 17, center_y - 17), (35, 35))
-        return ghost_rect
-
-    def move_clyde(self):
-        """
-        Move ghost on matrix based on possibility conditions
-        """
-        delta_time = self.clock.tick()
-
-        if self.moving_right:
-            if self.ghost_targets[0] > self.rect.x and self.turns[0]:
-                self.x += self.speed * (delta_time / 10)
-            elif not self.turns[0]:
-                self.moving_right = False
-                if self.ghost_targets[1] > self.rect.y and self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                elif self.ghost_targets[1] < self.rect.y and self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                elif self.ghost_targets[0] < self.rect.x and self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-                elif self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                elif self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                elif self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-            elif self.turns[0]:
-                if self.ghost_targets[1] > self.rect.y and self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                    self.moving_right = False
-                if self.ghost_targets[1] < self.rect.y and self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                    self.moving_right = False
-                else:
-                    self.x += self.speed * (delta_time / 10)
-        elif self.moving_left:
-            if self.ghost_targets[1] > self.rect.y and self.turns[3]:
-                self.moving_down = True
-                self.moving_left = False
-            elif self.ghost_targets[0] < self.rect.x and self.turns[1]:
-                self.x -= self.speed * (delta_time / 10)
-            elif not self.turns[1]:
-                self.moving_left = False
-                if self.ghost_targets[1] > self.rect.y and self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                elif self.ghost_targets[1] < self.rect.y and self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                elif self.ghost_targets[0] > self.rect.x and self.turns[0]:
-                    self.moving_right = True
-                    self.x += self.speed * (delta_time / 10)
-                elif self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                elif self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                elif self.turns[0]:
-                    self.moving_right = True
-                    self.x += self.speed * (delta_time / 10)
-            elif self.turns[1]:
-                if self.ghost_targets[1] > self.rect.y and self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                    self.moving_left = False
-                if self.ghost_targets[1] < self.rect.y and self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                    self.moving_left = False
-                else:
-                    self.x -= self.speed * (delta_time / 10)
-        elif self.moving_up:
-            if self.ghost_targets[0] < self.rect.x and self.turns[1]:
-                self.moving_left = True
-                self.x -= self.speed * (delta_time / 10)
-                self.moving_up = False
-            elif self.ghost_targets[1] < self.rect.y and self.turns[2]:
-                self.moving_up = True
-                self.y -= self.speed * (delta_time / 10)
-            elif not self.turns[2]:
-                self.moving_up = False
-                if self.ghost_targets[0] > self.rect.x and self.turns[0]:
-                    self.moving_right = True
-                    self.x += self.speed * (delta_time / 10)
-                elif self.ghost_targets[0] < self.rect.x and self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-                elif self.ghost_targets[1] > self.rect.y and self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                elif self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-                elif self.turns[3]:
-                    self.moving_down = True
-                    self.y += self.speed * (delta_time / 10)
-                elif self.turns[0]:
-                    self.moving_right = True
-                    self.x += self.speed * (delta_time / 10)
-            elif self.turns[2]:
-                if self.ghost_targets[0] > self.rect.x and self.turns[0]:
-                    self.moving_right = True
-                    self.x += self.speed * (delta_time / 10)
-                    self.moving_up = False
-                elif self.ghost_targets[0] < self.rect.x and self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-                    self.moving_up = False
-                else:
-                    self.y -= self.speed * (delta_time / 10)
-        elif self.moving_down:
-            if self.ghost_targets[1] > self.rect.y and self.turns[3]:
-                self.y += self.speed * (delta_time / 10)
-            elif not self.turns[3]:
-                self.moving_down = False
-                if self.ghost_targets[0] > self.rect.x and self.turns[0]:
-                    self.moving_right = True
-                    self.x += self.speed * (delta_time / 10)
-                elif self.ghost_targets[0] < self.rect.x and self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-                elif self.ghost_targets[1] < self.rect.y and self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                elif self.turns[2]:
-                    self.moving_up = True
-                    self.y -= self.speed * (delta_time / 10)
-                elif self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-                elif self.turns[0]:
-                    self.moving_right = True
-                    self.x += self.speed * (delta_time / 10)
-            elif self.turns[3]:
-                if self.ghost_targets[0] > self.rect.x and self.turns[0]:
-                    self.moving_right = True
-                    self.x += self.speed * (delta_time / 10)
-                    self.moving_down = False
-                elif self.ghost_targets[0] < self.rect.x and self.turns[1]:
-                    self.moving_left = True
-                    self.x -= self.speed * (delta_time / 10)
-                    self.moving_down = False
-                else:
-                    self.y += self.speed * (delta_time / 10)
-        if self.rect.x > 700:
-            self.x = -10
-            self.rect.x = self.x
-        elif self.rect.x < -10:
-            self.x = 700
-            self.rect.x = self.x
-        self.rect.x = self.x
-        self.rect.y = self.y
-        # return self.rect.x, self.rect.y, self.moving_left, self.moving_right, self.moving_up, self.moving_down
+        self.ghostMovement.draw(self)
+        self.ghostMovement.check_position(self)
+        self.ghostMovement.do_movement(self)
+        self.ghostMovement.check_collision(self)
