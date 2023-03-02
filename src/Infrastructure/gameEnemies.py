@@ -4,13 +4,17 @@ from abc import ABC, abstractmethod
 import pygame as pg
 from src.Infrastructure.gameProcesses.statistics import Statistics
 
+
 class MovementAlgorithm(ABC):
 
     @abstractmethod
     def do_algorithm(self, var):
         pass
 
+
 class GhostMovement():
+
+
 
     def __init__(self, movementAlgorithm: MovementAlgorithm) -> None:
         self._movementAlgorithm = movementAlgorithm
@@ -20,6 +24,8 @@ class GhostMovement():
         return self._movementAlgorithm
 
     @movementAlgorithm.setter
+
+
     def movementAlgorithm(self, movementAlgorithm: MovementAlgorithm) -> None:
         self._movementAlgorithm = movementAlgorithm
 
@@ -35,24 +41,36 @@ class GhostMovement():
         center_y = var.y + 17
         var.turns = [False, False, False, False]
         if 0 < center_x // 30 < 29:
+
+
             if var.map_matrix[int((center_y - tweaker) // y_pos)][int(center_x // x_pos)] == 9:
                 var.turns[2] = True
+
+
             if var.map_matrix[int(center_y // y_pos)][int((center_x - tweaker) // x_pos)] < 3 \
                     or (var.map_matrix[int(center_y // y_pos)][int((center_x - tweaker) // x_pos)] == 9 and (
                     var.in_box or var.eaten)):
                 var.turns[1] = True
+
+
             if var.map_matrix[int(center_y // y_pos)][int((center_x + tweaker) // x_pos)] < 3 \
                     or (var.map_matrix[int(center_y // y_pos)][int((center_x + tweaker) // x_pos)] == 9 and (
                     var.in_box or var.eaten)):
                 var.turns[0] = True
+
+
             if var.map_matrix[int((center_y + tweaker) // y_pos)][int(center_x // x_pos)] < 3 \
                     or (var.map_matrix[int((center_y + tweaker) // y_pos)][int(center_x // x_pos)] == 9 and (
                     var.in_box or var.eaten)):
                 var.turns[3] = True
+
+
             if var.map_matrix[int((center_y - tweaker) // y_pos)][int(center_x // x_pos)] < 3 \
                     or (var.map_matrix[int((center_y - tweaker) // y_pos)][int(center_x // x_pos)] == 9 and (
                     var.in_box or var.eaten)):
                 var.turns[2] = True
+
+
 
             if var.moving_up or var.moving_down:
                 if 1 <= center_x % x_pos <= 25:
@@ -78,6 +96,8 @@ class GhostMovement():
                             var.in_box or var.eaten)):
                         var.turns[0] = True
 
+
+
             if var.moving_right or var.moving_left:
                 if 1 <= center_x % x_pos <= 25:
                     if var.map_matrix[int((center_y + tweaker) // y_pos)][int(center_x // x_pos)] < 3 \
@@ -100,11 +120,15 @@ class GhostMovement():
         else:
             var.turns[0] = True
             var.turns[1] = True
+
+
         if 350 < var.x < 550 and 370 < var.y < 480:
             var.in_box = True
         else:
             var.in_box = False
         return var.turns, var.in_box
+
+
 
     def check_collision(self, var):
 
@@ -157,6 +181,8 @@ class GhostMovement():
                 var.moving_down = False
                 var.cooldown = 250
 
+
+
     def draw(self, var):
 
         center_x = var.rect.x + 17
@@ -169,6 +195,7 @@ class GhostMovement():
             var.screen.blit(var.spunky, (var.x, var.y))
         ghost_rect = pg.rect.Rect((center_x - 17, center_y - 17), (35, 35))
         return ghost_rect
+
 
 class ConcreteMovementOne(MovementAlgorithm):
 
@@ -323,6 +350,8 @@ class ConcreteMovementOne(MovementAlgorithm):
                     var.moving_down = False
                 else:
                     var.y += var.speed * (delta_time / 10)
+
+
         if var.rect.x > 700:
             var.x = -10
             var.rect.x = var.x
@@ -332,6 +361,7 @@ class ConcreteMovementOne(MovementAlgorithm):
         var.rect.x = var.x
         var.rect.y = var.y
         return var.rect.x, var.rect.y, var.moving_left, var.moving_right, var.moving_up, var.moving_down
+
 
 class ConcreteMovementTwo(MovementAlgorithm):
     def __init__(self):
@@ -442,6 +472,8 @@ class ConcreteMovementTwo(MovementAlgorithm):
                     var.x -= var.speed * (delta_time / 10)
             elif var.turns[3]:
                 var.y += var.speed * (delta_time / 10)
+
+
         if var.rect.x > 700:
             var.x = -10
             var.rect.x = var.x
@@ -451,6 +483,7 @@ class ConcreteMovementTwo(MovementAlgorithm):
         var.rect.x = var.x
         var.rect.y = var.y
         return var.rect.x, var.rect.y, var.moving_left, var.moving_right, var.moving_up, var.moving_down
+
 
 class ConcreteMovementThree(MovementAlgorithm):
     def __init__(self):
@@ -577,6 +610,8 @@ class ConcreteMovementThree(MovementAlgorithm):
                     var.x += var.speed * (delta_time / 10)
             elif var.turns[3]:
                 var.y += var.speed * (delta_time / 10)
+
+
         if var.rect.x > 700:
             var.x = -10
             var.rect.x = var.x
@@ -739,6 +774,8 @@ class ConcreteMovementFour(MovementAlgorithm):
                     var.moving_down = False
                 else:
                     var.y += var.speed * (delta_time / 10)
+
+
         if var.rect.x > 700:
             var.x = -10
             var.rect.x = var.x
@@ -751,6 +788,13 @@ class ConcreteMovementFour(MovementAlgorithm):
 
 class Blinky():
 
+
+    """
+    Checking if the ghost has been eaten 
+    by Pacman and if so it will change its movement to a new one If not it will check 
+    for collisions with walls or other ghosts and move accordingly Finally it checks 
+    whether the ghost is in a box which means that he can't be moved or not
+    """
     def __init__(self, var):
         self.image = pg.transform.scale(pg.image.load('src/Core/images/blinky.png'), (35, 35))
         self.vulnerable = var.vulnerable
@@ -808,8 +852,13 @@ class Blinky():
 
 
 class Inky():
+
+
     """
-    Inky object with draw, update, and move functions
+    Checking if the ghost has been eaten 
+    by Pacman and if so it will change its movement to a new one If not it will check 
+    for collisions with walls or other ghosts and move accordingly Finally it checks 
+    whether the ghost is in a box which means that he can't be moved or not
     """
     def __init__(self, var):
         self.image = pg.transform.scale(pg.image.load('src/Core/images/inky.png'), (35, 35))
@@ -868,10 +917,14 @@ class Inky():
         self.ghostMovement.check_collision(self)
 
 
-
 class Pinky():
+
+
     """
-    Pinky object with draw, update, and move functions
+    Checking if the ghost has been eaten 
+    by Pacman and if so it will change its movement to a new one If not it will check 
+    for collisions with walls or other ghosts and move accordingly Finally it checks 
+    whether the ghost is in a box which means that he can't be moved or not
     """
     def __init__(self, var):
         self.image = pg.transform.scale(pg.image.load('src/Core/images/pinky.png'), (35, 35))
@@ -931,8 +984,13 @@ class Pinky():
 
 
 class Clyde():
+
+
     """
-    Clyde object with draw, update, and move functions
+    Checking if the ghost has been eaten 
+    by Pacman and if so it will change its movement to a new one If not it will check 
+    for collisions with walls or other ghosts and move accordingly Finally it checks 
+    whether the ghost is in a box which means that he can't be moved or not
     """
     def __init__(self, var):
         self.image = pg.transform.scale(pg.image.load('src/Core/images/clyde.png'), (35, 35))
@@ -956,8 +1014,8 @@ class Clyde():
 
         self.moving_right = False
         self.moving_left = False
-        self.moving_up = False
-        self.moving_down = True
+        self.moving_up = True
+        self.moving_down = False
 
         self.eaten = False
         self.in_box = False
