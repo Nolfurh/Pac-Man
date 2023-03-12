@@ -68,7 +68,7 @@ class PackManWorld():
         self.pacmd.parse_cmd()
         self.screen = pg.display.set_mode((self.settings.screen_width, self.settings.screen_height))
         self.game_map = Level_1(self.settings)
-        self.player = Pacman(self)
+        self.player = Pacman(self.screen, self.settings, self.game_map)
         self.events = Events(self)
 
         self.statistics = Statistics()

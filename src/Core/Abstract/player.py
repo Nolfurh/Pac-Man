@@ -57,7 +57,7 @@ class Pacman:
     blitme():
         Draws objects on the screen
     """
-    def __init__(self, var):
+    def __init__(self, screen, settings, game_map):
         """
         Initializes the Pacman object.
 
@@ -66,8 +66,8 @@ class Pacman:
         var : VariableContainer
             A container object that contains various game variables.
         """
-        self.screen = var.screen
-        self.screen_rect = var.screen.get_rect()
+        self.screen = screen
+        self.screen_rect = screen.get_rect()
 
         self.spritesheet = []
         self.current_sprite = 0
@@ -77,8 +77,8 @@ class Pacman:
         self.image = self.spritesheet[self.current_sprite]
         self.rect = self.image.get_rect()
 
-        self.settings = var.settings
-        self.map_matrix = var.game_map.map_matrix
+        self.settings = settings
+        self.map_matrix = game_map.map_matrix
 
         self.rect.centerx = self.settings.pacman_x
         self.rect.centery = self.settings.pacman_y
