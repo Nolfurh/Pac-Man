@@ -14,8 +14,6 @@ class MovementAlgorithm(ABC):
 
 class GhostMovement():
 
-
-
     def __init__(self, movementAlgorithm: MovementAlgorithm) -> None:
         self._movementAlgorithm = movementAlgorithm
 
@@ -24,7 +22,6 @@ class GhostMovement():
         return self._movementAlgorithm
 
     @movementAlgorithm.setter
-
 
     def movementAlgorithm(self, movementAlgorithm: MovementAlgorithm) -> None:
         self._movementAlgorithm = movementAlgorithm
@@ -204,20 +201,23 @@ class ConcreteMovementOne(MovementAlgorithm):
 
     def do_algorithm(self, var):
 
+        center_x = var.x + 17
+        center_y = var.y + 17
+
         delta_time = self.clock.tick()
 
         if var.moving_right:
-            if var.ghost_targets[0] > var.rect.x and var.turns[0]:
+            if var.ghost_targets[0] > center_x and var.turns[0]:
                 var.x += var.speed * (delta_time / 10)
             elif not var.turns[0]:
                 var.moving_right = False
-                if var.ghost_targets[1] > var.rect.y and var.turns[3]:
+                if var.ghost_targets[1] > center_y and var.turns[3]:
                     var.moving_down = True
                     var.y += var.speed * (delta_time / 10)
-                elif var.ghost_targets[1] < var.rect.y and var.turns[2]:
+                elif var.ghost_targets[1] < center_y and var.turns[2]:
                     var.moving_up = True
                     var.y -= var.speed * (delta_time / 10)
-                elif var.ghost_targets[0] < var.rect.x and var.turns[1]:
+                elif var.ghost_targets[0] < center_x and var.turns[1]:
                     var.moving_left = True
                     var.x -= var.speed * (delta_time / 10)
                 elif var.turns[3]:
@@ -230,31 +230,31 @@ class ConcreteMovementOne(MovementAlgorithm):
                     var.moving_left = True
                     var.x -= var.speed * (delta_time / 10)
             elif var.turns[0]:
-                if var.ghost_targets[1] > var.rect.y and var.turns[3]:
+                if var.ghost_targets[1] > center_y and var.turns[3]:
                     var.moving_down = True
                     var.y += var.speed * (delta_time / 10)
                     var.moving_right = False
-                if var.ghost_targets[1] < var.rect.y and var.turns[2]:
+                if var.ghost_targets[1] < center_y and var.turns[2]:
                     var.moving_up = True
                     var.y -= var.speed * (delta_time / 10)
                     var.moving_right = False
                 else:
                     var.x += var.speed
         elif var.moving_left:
-            if var.ghost_targets[1] > var.rect.y and var.turns[3]:
+            if var.ghost_targets[1] > center_y and var.turns[3]:
                 var.moving_down = True
                 var.moving_left = False
-            elif var.ghost_targets[0] < var.rect.x and var.turns[1]:
+            elif var.ghost_targets[0] < center_x and var.turns[1]:
                 var.x -= var.speed * (delta_time / 10)
             elif not var.turns[1]:
                 var.moving_left = False
-                if var.ghost_targets[1] > var.rect.y and var.turns[3]:
+                if var.ghost_targets[1] > center_y and var.turns[3]:
                     var.moving_down = True
                     var.y += var.speed * (delta_time / 10)
-                elif var.ghost_targets[1] < var.rect.y and var.turns[2]:
+                elif var.ghost_targets[1] < center_y and var.turns[2]:
                     var.moving_up = True
                     var.y -= var.speed * (delta_time / 10)
-                elif var.ghost_targets[0] > var.rect.x and var.turns[0]:
+                elif var.ghost_targets[0] > center_x and var.turns[0]:
                     var.moving_right = True
                     var.x += var.speed * (delta_time / 10)
                 elif var.turns[3]:
@@ -267,33 +267,33 @@ class ConcreteMovementOne(MovementAlgorithm):
                     var.moving_right = True
                     var.x += var.speed * (delta_time / 10)
             elif var.turns[1]:
-                if var.ghost_targets[1] > var.rect.y and var.turns[3]:
+                if var.ghost_targets[1] > center_y and var.turns[3]:
                     var.moving_down = True
                     var.y += var.speed * (delta_time / 10)
                     var.moving_left = False
-                if var.ghost_targets[1] < var.rect.y and var.turns[2]:
+                if var.ghost_targets[1] < center_y and var.turns[2]:
                     var.moving_up = True
                     var.y -= var.speed * (delta_time / 10)
                     var.moving_left = False
                 else:
                     var.x -= var.speed * (delta_time / 10)
         elif var.moving_up:
-            if var.ghost_targets[0] < var.rect.x and var.turns[1]:
+            if var.ghost_targets[0] < center_x and var.turns[1]:
                 var.moving_left = True
                 var.x -= var.speed * (delta_time / 10)
                 var.moving_up = False
-            elif var.ghost_targets[1] < var.rect.y and var.turns[2]:
+            elif var.ghost_targets[1] < center_y and var.turns[2]:
                 var.moving_up = True
                 var.y -= var.speed * (delta_time / 10)
             elif not var.turns[2]:
                 var.moving_up = False
-                if var.ghost_targets[0] > var.rect.x and var.turns[0]:
+                if var.ghost_targets[0] > center_x and var.turns[0]:
                     var.moving_right = True
                     var.x += var.speed * (delta_time / 10)
-                elif var.ghost_targets[0] < var.rect.x and var.turns[1]:
+                elif var.ghost_targets[0] < center_x and var.turns[1]:
                     var.moving_left = True
                     var.x -= var.speed * (delta_time / 10)
-                elif var.ghost_targets[1] > var.rect.y and var.turns[3]:
+                elif var.ghost_targets[1] > center_y and var.turns[3]:
                     var.moving_down = True
                     var.y += var.speed * (delta_time / 10)
                 elif var.turns[1]:
@@ -306,28 +306,28 @@ class ConcreteMovementOne(MovementAlgorithm):
                     var.moving_right = True
                     var.x += var.speed * (delta_time / 10)
             elif var.turns[2]:
-                if var.ghost_targets[0] > var.rect.x and var.turns[0]:
+                if var.ghost_targets[0] > center_x and var.turns[0]:
                     var.moving_right = True
                     var.x += var.speed * (delta_time / 10)
                     var.moving_up = False
-                elif var.ghost_targets[0] < var.rect.x and var.turns[1]:
+                elif var.ghost_targets[0] < center_x and var.turns[1]:
                     var.moving_left = True
                     var.x -= var.speed * (delta_time / 10)
                     var.moving_up = False
                 else:
                     var.y -= var.speed * (delta_time / 10)
         elif var.moving_down:
-            if var.ghost_targets[1] > var.rect.y and var.turns[3]:
+            if var.ghost_targets[1] > center_y and var.turns[3]:
                 var.y += var.speed * (delta_time / 10)
             elif not var.turns[3]:
                 var.moving_down = False
-                if var.ghost_targets[0] > var.rect.x and var.turns[0]:
+                if var.ghost_targets[0] > center_x and var.turns[0]:
                     var.moving_right = True
                     var.x += var.speed * (delta_time / 10)
-                elif var.ghost_targets[0] < var.rect.x and var.turns[1]:
+                elif var.ghost_targets[0] < center_x and var.turns[1]:
                     var.moving_left = True
                     var.x -= var.speed * (delta_time / 10)
-                elif var.ghost_targets[1] < var.rect.y and var.turns[2]:
+                elif var.ghost_targets[1] < center_y and var.turns[2]:
                     var.moving_up = True
                     var.y -= var.speed * (delta_time / 10)
                 elif var.turns[2]:
@@ -340,27 +340,24 @@ class ConcreteMovementOne(MovementAlgorithm):
                     var.moving_right = True
                     var.x += var.speed * (delta_time / 10)
             elif var.turns[3]:
-                if var.ghost_targets[0] > var.rect.x and var.turns[0]:
+                if var.ghost_targets[0] > center_x and var.turns[0]:
                     var.moving_right = True
                     var.x += var.speed * (delta_time / 10)
                     var.moving_down = False
-                elif var.ghost_targets[0] < var.rect.x and var.turns[1]:
+                elif var.ghost_targets[0] < center_x and var.turns[1]:
                     var.moving_left = True
                     var.x -= var.speed * (delta_time / 10)
                     var.moving_down = False
                 else:
                     var.y += var.speed * (delta_time / 10)
 
-
-        if var.rect.x > 700:
+        if center_x > 700:
             var.x = -10
-            var.rect.x = var.x
-        elif var.rect.x < -10:
+            center_x = var.x
+        elif center_x < -10:
             var.x = 700
-            var.rect.x = var.x
-        var.rect.x = var.x
-        var.rect.y = var.y
-        return var.rect.x, var.rect.y, var.moving_left, var.moving_right, var.moving_up, var.moving_down
+            center_x = var.x
+        return var.x, var.y, var.moving_left, var.moving_right, var.moving_up, var.moving_down
 
 
 class ConcreteMovementTwo(MovementAlgorithm):
@@ -474,15 +471,11 @@ class ConcreteMovementTwo(MovementAlgorithm):
                 var.y += var.speed * (delta_time / 10)
 
 
-        if var.rect.x > 700:
+        if var.x > 700:
             var.x = -10
-            var.rect.x = var.x
-        elif var.rect.x < -10:
+        elif var.x < -10:
             var.x = 700
-            var.rect.x = var.x
-        var.rect.x = var.x
-        var.rect.y = var.y
-        return var.rect.x, var.rect.y, var.moving_left, var.moving_right, var.moving_up, var.moving_down
+        return var.x, var.y, var.moving_left, var.moving_right, var.moving_up, var.moving_down
 
 
 class ConcreteMovementThree(MovementAlgorithm):
@@ -491,7 +484,7 @@ class ConcreteMovementThree(MovementAlgorithm):
     
     def do_algorithm(self, var):
 
-        delta_time = var.clock.tick()
+        delta_time = self.clock.tick()
 
         if var.moving_right:
             if var.ghost_targets[0] > var.x and var.turns[0]:
@@ -612,15 +605,12 @@ class ConcreteMovementThree(MovementAlgorithm):
                 var.y += var.speed * (delta_time / 10)
 
 
-        if var.rect.x > 700:
+        if var.x > 700:
             var.x = -10
-            var.rect.x = var.x
-        elif var.rect.x < -10:
+        elif var.x < -10:
             var.x = 700
-            var.rect.x = var.x
-        var.rect.x = var.x
-        var.rect.y = var.y
-        return var.rect.x, var.rect.y, var.moving_left, var.moving_right, var.moving_up, var.moving_down
+        return var.x, var.y, var.moving_left, var.moving_right, var.moving_up, var.moving_down
+
 
 class ConcreteMovementFour(MovementAlgorithm):
     def __init__(self):
@@ -628,20 +618,20 @@ class ConcreteMovementFour(MovementAlgorithm):
     
     def do_algorithm(self, var):
 
-        delta_time = var.clock.tick()
+        delta_time = self.clock.tick()
 
         if var.moving_right:
-            if var.ghost_targets[0] > var.rect.x and var.turns[0]:
+            if var.ghost_targets[0] > var.x and var.turns[0]:
                 var.x += var.speed * (delta_time / 10)
             elif not var.turns[0]:
                 var.moving_right = False
-                if var.ghost_targets[1] > var.rect.y and var.turns[3]:
+                if var.ghost_targets[1] > var.y and var.turns[3]:
                     var.moving_down = True
                     var.y += var.speed * (delta_time / 10)
-                elif var.ghost_targets[1] < var.rect.y and var.turns[2]:
+                elif var.ghost_targets[1] < var.y and var.turns[2]:
                     var.moving_up = True
                     var.y -= var.speed * (delta_time / 10)
-                elif var.ghost_targets[0] < var.rect.x and var.turns[1]:
+                elif var.ghost_targets[0] < var.x and var.turns[1]:
                     var.moving_left = True
                     var.x -= var.speed * (delta_time / 10)
                 elif var.turns[3]:
@@ -654,31 +644,31 @@ class ConcreteMovementFour(MovementAlgorithm):
                     var.moving_left = True
                     var.x -= var.speed * (delta_time / 10)
             elif var.turns[0]:
-                if var.ghost_targets[1] > var.rect.y and var.turns[3]:
+                if var.ghost_targets[1] > var.y and var.turns[3]:
                     var.moving_down = True
                     var.y += var.speed * (delta_time / 10)
                     var.moving_right = False
-                if var.ghost_targets[1] < var.rect.y and var.turns[2]:
+                if var.ghost_targets[1] < var.y and var.turns[2]:
                     var.moving_up = True
                     var.y -= var.speed * (delta_time / 10)
                     var.moving_right = False
                 else:
                     var.x += var.speed * (delta_time / 10)
         elif var.moving_left:
-            if var.ghost_targets[1] > var.rect.y and var.turns[3]:
+            if var.ghost_targets[1] > var.y and var.turns[3]:
                 var.moving_down = True
                 var.moving_left = False
-            elif var.ghost_targets[0] < var.rect.x and var.turns[1]:
+            elif var.ghost_targets[0] < var.x and var.turns[1]:
                 var.x -= var.speed * (delta_time / 10)
             elif not var.turns[1]:
                 var.moving_left = False
-                if var.ghost_targets[1] > var.rect.y and var.turns[3]:
+                if var.ghost_targets[1] > var.y and var.turns[3]:
                     var.moving_down = True
                     var.y += var.speed * (delta_time / 10)
-                elif var.ghost_targets[1] < var.rect.y and var.turns[2]:
+                elif var.ghost_targets[1] < var.y and var.turns[2]:
                     var.moving_up = True
                     var.y -= var.speed * (delta_time / 10)
-                elif var.ghost_targets[0] > var.rect.x and var.turns[0]:
+                elif var.ghost_targets[0] > var.x and var.turns[0]:
                     var.moving_right = True
                     var.x += var.speed * (delta_time / 10)
                 elif var.turns[3]:
@@ -691,33 +681,33 @@ class ConcreteMovementFour(MovementAlgorithm):
                     var.moving_right = True
                     var.x += var.speed * (delta_time / 10)
             elif var.turns[1]:
-                if var.ghost_targets[1] > var.rect.y and var.turns[3]:
+                if var.ghost_targets[1] > var.y and var.turns[3]:
                     var.moving_down = True
                     var.y += var.speed * (delta_time / 10)
                     var.moving_left = False
-                if var.ghost_targets[1] < var.rect.y and var.turns[2]:
+                if var.ghost_targets[1] < var.y and var.turns[2]:
                     var.moving_up = True
                     var.y -= var.speed * (delta_time / 10)
                     var.moving_left = False
                 else:
                     var.x -= var.speed * (delta_time / 10)
         elif var.moving_up:
-            if var.ghost_targets[0] < var.rect.x and var.turns[1]:
+            if var.ghost_targets[0] < var.x and var.turns[1]:
                 var.moving_left = True
                 var.x -= var.speed * (delta_time / 10)
                 var.moving_up = False
-            elif var.ghost_targets[1] < var.rect.y and var.turns[2]:
+            elif var.ghost_targets[1] < var.y and var.turns[2]:
                 var.moving_up = True
                 var.y -= var.speed * (delta_time / 10)
             elif not var.turns[2]:
                 var.moving_up = False
-                if var.ghost_targets[0] > var.rect.x and var.turns[0]:
+                if var.ghost_targets[0] > var.x and var.turns[0]:
                     var.moving_right = True
                     var.x += var.speed * (delta_time / 10)
-                elif var.ghost_targets[0] < var.rect.x and var.turns[1]:
+                elif var.ghost_targets[0] < var.x and var.turns[1]:
                     var.moving_left = True
                     var.x -= var.speed * (delta_time / 10)
-                elif var.ghost_targets[1] > var.rect.y and var.turns[3]:
+                elif var.ghost_targets[1] > var.y and var.turns[3]:
                     var.moving_down = True
                     var.y += var.speed * (delta_time / 10)
                 elif var.turns[1]:
@@ -730,28 +720,28 @@ class ConcreteMovementFour(MovementAlgorithm):
                     var.moving_right = True
                     var.x += var.speed * (delta_time / 10)
             elif var.turns[2]:
-                if var.ghost_targets[0] > var.rect.x and var.turns[0]:
+                if var.ghost_targets[0] > var.x and var.turns[0]:
                     var.moving_right = True
                     var.x += var.speed * (delta_time / 10)
                     var.moving_up = False
-                elif var.ghost_targets[0] < var.rect.x and var.turns[1]:
+                elif var.ghost_targets[0] < var.x and var.turns[1]:
                     var.moving_left = True
                     var.x -= var.speed * (delta_time / 10)
                     var.moving_up = False
                 else:
                     var.y -= var.speed * (delta_time / 10)
         elif var.moving_down:
-            if var.ghost_targets[1] > var.rect.y and var.turns[3]:
+            if var.ghost_targets[1] > var.y and var.turns[3]:
                 var.y += var.speed * (delta_time / 10)
             elif not var.turns[3]:
                 var.moving_down = False
-                if var.ghost_targets[0] > var.rect.x and var.turns[0]:
+                if var.ghost_targets[0] > var.x and var.turns[0]:
                     var.moving_right = True
                     var.x += var.speed * (delta_time / 10)
-                elif var.ghost_targets[0] < var.rect.x and var.turns[1]:
+                elif var.ghost_targets[0] < var.x and var.turns[1]:
                     var.moving_left = True
                     var.x -= var.speed * (delta_time / 10)
-                elif var.ghost_targets[1] < var.rect.y and var.turns[2]:
+                elif var.ghost_targets[1] < var.y and var.turns[2]:
                     var.moving_up = True
                     var.y -= var.speed * (delta_time / 10)
                 elif var.turns[2]:
@@ -764,11 +754,11 @@ class ConcreteMovementFour(MovementAlgorithm):
                     var.moving_right = True
                     var.x += var.speed * (delta_time / 10)
             elif var.turns[3]:
-                if var.ghost_targets[0] > var.rect.x and var.turns[0]:
+                if var.ghost_targets[0] > var.x and var.turns[0]:
                     var.moving_right = True
                     var.x += var.speed * (delta_time / 10)
                     var.moving_down = False
-                elif var.ghost_targets[0] < var.rect.x and var.turns[1]:
+                elif var.ghost_targets[0] < var.x and var.turns[1]:
                     var.moving_left = True
                     var.x -= var.speed * (delta_time / 10)
                     var.moving_down = False
@@ -776,15 +766,11 @@ class ConcreteMovementFour(MovementAlgorithm):
                     var.y += var.speed * (delta_time / 10)
 
 
-        if var.rect.x > 700:
+        if var.x > 700:
             var.x = -10
-            var.rect.x = var.x
-        elif var.rect.x < -10:
+        elif var.x < -10:
             var.x = 700
-            var.rect.x = var.x
-        var.rect.x = var.x
-        var.rect.y = var.y
-        return var.rect.x, var.rect.y, var.moving_left, var.moving_right, var.moving_up, var.moving_down
+        return var.x, var.y, var.moving_left, var.moving_right, var.moving_up, var.moving_down
 
 class Blinky():
 
@@ -848,11 +834,12 @@ class Blinky():
         self.ghostMovement.draw(self)
         self.ghostMovement.check_position(self)
         self.ghostMovement.do_movement(self)
+        self.rect.x = self.x
+        self.rect.y = self.y
         self.ghostMovement.check_collision(self)
 
 
 class Inky():
-
 
     """
     Checking if the ghost has been eaten 
@@ -914,6 +901,8 @@ class Inky():
         self.ghostMovement.draw(self)
         self.ghostMovement.check_position(self)
         self.ghostMovement.do_movement(self)
+        self.rect.x = self.x
+        self.rect.y = self.y
         self.ghostMovement.check_collision(self)
 
 
@@ -979,7 +968,8 @@ class Pinky():
         self.ghostMovement.draw(self)
         self.ghostMovement.check_position(self)
         self.ghostMovement.do_movement(self)
-
+        self.rect.x = self.x
+        self.rect.y = self.y
         self.ghostMovement.check_collision(self)
 
 
@@ -1045,4 +1035,6 @@ class Clyde():
         self.ghostMovement.draw(self)
         self.ghostMovement.check_position(self)
         self.ghostMovement.do_movement(self)
+        self.rect.x = self.x
+        self.rect.y = self.y
         self.ghostMovement.check_collision(self)
